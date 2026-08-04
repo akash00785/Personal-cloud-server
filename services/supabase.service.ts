@@ -5,3 +5,6 @@
 // =============================================================
 
 export type { SupabaseClient } from '@supabase/supabase-js';
+
+// Re-export auth service helpers for convenience
+export { getProfile, ensureProfile } from '@/services/auth.service';

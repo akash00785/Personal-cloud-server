@@ -1,54 +1,51 @@
 # TODO
 
-## Agent-02 — Authentication
+## 🔴 Critical (Before Agent-03 starts)
 
-- [ ] Create Supabase project, copy credentials to `.env.local`
-- [ ] Implement `/login` page (email + password)
-- [ ] Implement `/register` page
-- [ ] Implement `/forgot-password` page
-- [ ] Implement `/auth/callback` route handler for OAuth
-- [ ] Add protected route middleware (redirect unauthenticated users)
-- [ ] Add user session context provider
-- [ ] Add logout button to Header
+- [ ] **Run Supabase SQL migration** — Open `docs/supabase-setup.md` and execute the SQL in Supabase Dashboard → SQL Editor. This creates the `profiles` table, Row Level Security policies, and the `handle_new_user` trigger.
+- [ ] **Configure Supabase Auth settings** — Set Site URL and Redirect URLs in Dashboard → Authentication → URL Configuration.
 
-## Agent-03 — File Manager
+---
 
-- [ ] Design and create Supabase storage bucket
-- [ ] Create `/dashboard` page with file overview stats
-- [ ] Create `/files` page with file list
-- [ ] Implement file upload (drag-and-drop + file picker)
-- [ ] Implement file download
-- [ ] Implement file delete
-- [ ] Implement folder creation and navigation
-- [ ] Add file type icons
-- [ ] Add file preview (images, PDFs)
+## 🟡 Agent-03: File Management
 
-## Agent-04 — Google Drive Integration
+- [ ] Create file manager page (`/files`)
+- [ ] Implement file upload API route (`/api/files/upload`)
+- [ ] Implement file download API route (`/api/files/[id]/download`)
+- [ ] Implement file delete API route
+- [ ] List files from Supabase Storage
+- [ ] Create Supabase Storage bucket (`personal-files`) with RLS
+- [ ] Display file list with name, size, type, date
 
-- [ ] Set up Google Cloud project and OAuth 2.0 credentials
-- [ ] Implement Google Drive OAuth flow
-- [ ] List Google Drive files
-- [ ] Import Google Drive files to personal cloud
-- [ ] Export files to Google Drive
+---
 
-## Agent-05 — Remote Downloader
+## 🟡 Agent-04+: Additional Features
 
-- [ ] Create download queue UI
-- [ ] Implement URL submission form
-- [ ] Implement server-side download via API route
-- [ ] Track download progress (WebSocket or polling)
-- [ ] Store downloaded files to Supabase storage
+- [ ] Connect Google Drive integration
+- [ ] Implement remote downloader (URL → cloud)
+- [ ] Implement media streaming (audio/video)
+- [ ] Implement search functionality
+- [ ] Create Settings page (`/settings`)
+- [ ] Configure Render deployment (`render.yaml`)
+- [ ] Add testing setup (Jest / Vitest + Testing Library)
 
-## Agent-06 — Search & Streaming
+---
 
-- [ ] Implement full-text search across files
-- [ ] Implement video/audio streaming from Supabase storage
-- [ ] Add search filters (file type, date, size)
+## ✅ Completed
 
-## Agent-07 — Deployment
-
-- [ ] Create `render.yaml` for Render deployment
-- [ ] Configure production environment variables on Render
-- [ ] Set up custom domain (optional)
-- [ ] Configure Supabase production environment
-- [ ] Set up CI/CD (GitHub Actions → Render)
+- [x] Project foundation (Next.js, TypeScript, Tailwind, ESLint, Prettier)
+- [x] Supabase client setup (browser + server + proxy)
+- [x] Dark theme + responsive layout
+- [x] Reusable UI components (Button, Input, Card, Badge, Spinner)
+- [x] Layout components (Header, Footer, Sidebar, PageWrapper)
+- [x] Custom hooks (useLocalStorage, useTheme, useMediaQuery, useAuth)
+- [x] Email/Password Sign Up
+- [x] Email/Password Login
+- [x] Logout (Sign Out button)
+- [x] Session management (proxy.ts refresh)
+- [x] Protected routes (proxy.ts + `(protected)` layout guard)
+- [x] Auth Server Actions (signIn, signUp, signOut, updateProfile)
+- [x] Auth callback route
+- [x] User profile create/read/update
+- [x] Profile page UI
+- [x] Auth-aware Header and Home page

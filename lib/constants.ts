@@ -22,3 +22,12 @@ export const ACCEPTED_FILE_TYPES = [
 
 export const MAX_UPLOAD_SIZE_MB = 100;
 export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+
+// ---------- Auth ----------
+export const AUTH_ROUTES = {
+  LOGIN: '/auth/login',
+  SIGNUP: '/auth/signup',
+  CALLBACK: '/auth/callback',
+} as const;
+
+export const PROTECTED_ROUTES = ['/dashboard', '/files', '/profile', '/settings'] as const;

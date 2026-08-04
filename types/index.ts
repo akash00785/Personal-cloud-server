@@ -14,13 +14,23 @@ export interface ApiResponse<T = unknown> {
   status: number;
 }
 
-// ---------- User ----------
+// ---------- User / Auth ----------
 export interface UserProfile {
   id: string;
   email: string;
   displayName: string | null;
   avatarUrl: string | null;
   createdAt: string;
+}
+
+/** Shape of a row in the `profiles` table */
+export interface ProfileRow {
+  id: string;
+  email: string | null;
+  display_name: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 // ---------- File / Storage (future) ----------
