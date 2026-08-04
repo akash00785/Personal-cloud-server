@@ -1,8 +1,8 @@
 # Project Status
 
 **Last Updated:** 2026-08-04
-**Agent:** Agent-04 (File Manager UI)
-**Phase:** File Manager UI — Grid/List View, Drag & Drop Upload, Search, Sort
+**Agent:** Agent-05 (Folder System)
+**Phase:** Folder System — Create, Rename, Delete, Breadcrumb Navigation, Folder List UI
 
 ---
 
@@ -74,18 +74,43 @@
 ## ✅ Completed Tasks (Agent-04 — File Manager UI)
 
 - [x] **Updated `types/index.ts`** — Added `SortField`, `SortOrder`, `ViewMode`, `UploadingFile` types
-- [x] **Created `hooks/useFiles.ts`** — file list, refresh, delete, download (Promise-based, no sync setState in effects)
+- [x] **Created `hooks/useFiles.ts`** — file list, refresh, delete, download
 - [x] **Created `hooks/useFileUpload.ts`** — multiple file upload with XHR progress tracking
 - [x] **Created `components/files/FileIcon.tsx`** — SVG icon + color-coded background by MIME category
 - [x] **Created `components/files/UploadZone.tsx`** — drag & drop zone with keyboard accessibility
 - [x] **Created `components/files/UploadQueue.tsx`** — per-file progress bars with status indicators
 - [x] **Created `components/files/FileCard.tsx`** — grid view card with hover actions
 - [x] **Created `components/files/FileRow.tsx`** — list view row with responsive columns
-- [x] **Created `components/files/FileToolbar.tsx`** — search, sort (name/size/date + asc/desc), grid/list toggle
+- [x] **Created `components/files/FileToolbar.tsx`** — search, sort, grid/list toggle
 - [x] **Created `components/files/DeleteDialog.tsx`** — accessible modal with confirm/cancel
-- [x] **Created `app/(protected)/files/page.tsx`** — full file manager page wiring all components
-- [x] **Build** — zero errors, zero TypeScript errors
+- [x] **Created `app/(protected)/files/page.tsx`** — full file manager page
+
+---
+
+## ✅ Completed Tasks (Agent-05 — Folder System)
+
+- [x] **Updated `types/index.ts`** — Added `FolderRow`, `FolderItem`, `BreadcrumbItem`; updated `FileMetadataRow` and `FileListItem` with `folder_id`/`folderId`
+- [x] **Updated `lib/validation.ts`** — Added `isValidFolderName`
+- [x] **Updated `services/storage.service.ts`** — `uploadFile` now accepts optional `folderId`; `listUserFiles` supports optional folder filter
+- [x] **Created `services/folder.service.ts`** — `createFolder`, `listFolders`, `renameFolder`, `deleteFolder`, `getFolderPath`
+- [x] **Updated `app/api/files/route.ts`** — accepts `?folderId=` query param (backward-compatible)
+- [x] **Updated `app/api/files/upload/route.ts`** — accepts optional `folderId` form field
+- [x] **Created `app/api/folders/route.ts`** — `GET` list + `POST` create
+- [x] **Created `app/api/folders/[id]/route.ts`** — `PATCH` rename + `DELETE` delete
+- [x] **Created `app/api/folders/[id]/path/route.ts`** — `GET` breadcrumb trail
+- [x] **Updated `hooks/useFiles.ts`** — accepts optional `folderId` parameter
+- [x] **Created `hooks/useFolders.ts`** — folder list, breadcrumbs, create, rename, delete
+- [x] **Created `components/folders/Breadcrumb.tsx`** — breadcrumb navigation component
+- [x] **Created `components/folders/FolderCard.tsx`** — grid view folder card with rename/delete actions
+- [x] **Created `components/folders/FolderRow.tsx`** — list view folder row with rename/delete actions
+- [x] **Created `components/folders/CreateFolderDialog.tsx`** — accessible create dialog
+- [x] **Created `components/folders/RenameFolderDialog.tsx`** — accessible rename dialog
+- [x] **Created `components/folders/DeleteFolderDialog.tsx`** — accessible delete dialog with cascade warning
+- [x] **Updated `app/(protected)/files/page.tsx`** — integrated folder navigation, breadcrumb, folder CRUD
+- [x] **Created `docs/folder-setup.md`** — idempotent SQL migration guide
+- [x] **Build** — zero TypeScript errors, zero errors
 - [x] **ESLint** — zero errors, zero warnings
+- [x] **npm audit** — 0 known vulnerabilities
 
 ---
 
@@ -94,62 +119,49 @@
 ```
 app/
 ├── api/
-│   └── files/
-│       ├── route.ts              # GET list
-│       ├── upload/route.ts       # POST upload
-│       └── [id]/route.ts         # GET signed URL / DELETE
-├── auth/
-│   ├── layout.tsx
-│   ├── login/page.tsx
-│   ├── signup/page.tsx
-│   ├── callback/route.ts
-│   └── actions.ts
+│   ├── files/
+│   │   ├── route.ts              # GET list (supports ?folderId=)
+│   │   ├── upload/route.ts       # POST upload (supports folderId field)
+│   │   └── [id]/route.ts         # GET signed URL / DELETE
+│   └── folders/                  # ← NEW
+│       ├── route.ts              # GET list / POST create
+│       └── [id]/
+│           ├── route.ts          # PATCH rename / DELETE delete
+│           └── path/route.ts     # GET breadcrumb trail
 ├── (protected)/
-│   ├── layout.tsx                # auth guard
+│   ├── layout.tsx
 │   ├── dashboard/page.tsx
-│   ├── files/page.tsx            # ← NEW: File Manager
+│   ├── files/page.tsx            # ← UPDATED: folder-aware
 │   └── profile/page.tsx
-├── globals.css
-├── layout.tsx
-├── page.tsx
-├── error.tsx
-├── not-found.tsx
-└── loading.tsx
 components/
-├── auth/SignOutButton.tsx
-├── profile/ProfileForm.tsx
-├── files/                        # ← NEW
-│   ├── FileIcon.tsx
-│   ├── UploadZone.tsx
-│   ├── UploadQueue.tsx
-│   ├── FileCard.tsx
-│   ├── FileRow.tsx
-│   ├── FileToolbar.tsx
-│   └── DeleteDialog.tsx
-├── ui/ (Button, Card, Input, Badge, Spinner)
-└── layout/ (Header, Footer, Sidebar, PageWrapper)
+├── files/ (FileIcon, UploadZone, UploadQueue, FileCard, FileRow, FileToolbar, DeleteDialog)
+├── folders/                      # ← NEW
+│   ├── Breadcrumb.tsx
+│   ├── FolderCard.tsx
+│   ├── FolderRow.tsx
+│   ├── CreateFolderDialog.tsx
+│   ├── RenameFolderDialog.tsx
+│   └── DeleteFolderDialog.tsx
 hooks/
-├── useAuth.ts
-├── useFiles.ts                   # ← NEW
-├── useFileUpload.ts              # ← NEW
-├── useLocalStorage.ts
-├── useTheme.ts
-└── useMediaQuery.ts
+├── useFiles.ts                   # ← UPDATED: optional folderId param
+├── useFolders.ts                 # ← NEW
+├── useFileUpload.ts
 services/
-├── auth.service.ts
-├── storage.service.ts
-└── supabase.service.ts
-types/index.ts                    # SortField, SortOrder, ViewMode, UploadingFile added
+├── folder.service.ts             # ← NEW
+├── storage.service.ts            # ← UPDATED: folderId support
+docs/
+├── supabase-setup.md
+├── storage-setup.md
+└── folder-setup.md               # ← NEW: SQL migration for folders
 ```
 
 ---
 
-## 📝 Notes for Agent-05
+## 📝 Notes for Agent-06
 
-1. **Run BOTH SQL migrations** — `docs/supabase-setup.md` (profiles) and `docs/storage-setup.md` (file_metadata + storage bucket) must be executed in Supabase Dashboard before files work
-2. **Backend API is complete** — `/api/files` (list), `/api/files/upload` (POST), `/api/files/[id]` (GET signed URL / DELETE) are ready
-3. **File Manager is complete** — Grid/List view, search, sort, upload with progress, delete with confirmation
-4. **Three-layer user isolation** — Storage path prefix, Storage RLS, file_metadata RLS all independently enforce per-user access
-5. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
-6. **Dark theme, `cn()`, `@/` alias** — always follow PROJECT_RULES.md
-7. **Hook pattern** — `useFiles.ts` and `useFileUpload.ts` use `.then()/.catch()` for all setState calls; never call setState synchronously inside useEffect bodies (project ESLint rule: `react-hooks/set-state-in-effect`)
+1. **Run SQL migration** — `docs/folder-setup.md` must be executed in Supabase Dashboard before folders work
+2. **Folder API is complete** — `/api/folders` (list/create), `/api/folders/:id` (rename/delete), `/api/folders/:id/path` (breadcrumb)
+3. **File upload supports folderId** — pass `folderId` as a form field to `POST /api/files/upload`
+4. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
+5. **Dark theme, `cn()`, `@/` alias** — always follow PROJECT_RULES.md
+6. **Hook pattern** — all setState calls inside `.then()/.catch()` callbacks; never synchronous inside useEffect bodies

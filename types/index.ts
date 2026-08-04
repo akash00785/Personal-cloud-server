@@ -55,6 +55,7 @@ export interface FileMetadataRow {
   file_name: string;
   file_size: number;
   mime_type: string;
+  folder_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -76,6 +77,7 @@ export interface FileListItem {
   fileSize: number;
   mimeType: string;
   storagePath: string;
+  folderId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -107,6 +109,35 @@ export interface UploadingFile {
   progress: number;
   status: 'pending' | 'uploading' | 'done' | 'error';
   error?: string;
+}
+
+// ---------- Folder System ----------
+
+/** Shape of a row in the `folders` table */
+export interface FolderRow {
+  id: string;
+  owner_id: string;
+  name: string;
+  parent_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Application-level folder object (camelCase) */
+export interface FolderItem {
+  id: string;
+  name: string;
+  parentId: string | null;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A single crumb in a breadcrumb navigation trail */
+export interface BreadcrumbItem {
+  /** null represents the root (Files) level */
+  id: string | null;
+  name: string;
 }
 
 // ---------- Navigation ----------

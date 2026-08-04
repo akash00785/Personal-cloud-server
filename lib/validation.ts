@@ -149,3 +149,33 @@ export function validateUploadedFile(
 
   return { valid: true, message: '' };
 }
+
+// =============================================================
+// Folder validation
+// =============================================================
+
+/**
+ * Validate a folder name.
+ * - Non-empty, max 255 chars
+ * - No path separators or control characters
+ * - No leading/trailing whitespace after trim
+ */
+export function isValidFolderName(name: string): { valid: boolean; message: string } {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return { valid: false, message: 'Folder name cannot be empty.' };
+  }
+  if (trimmed.length > 255) {
+    return { valid: false, message: 'Folder name is too long (max 255 characters).' };
+  }
+  if (trimmed.includes('/') || trimmed.includes('\\')) {
+    return { valid: false, message: 'Folder name cannot contain slashes.' };
+  }
+  if (trimmed === '.' || trimmed === '..') {
+    return { valid: false, message: 'Folder name is not valid.' };
+  }
+  if (/[\x00-\x1f\x7f]/.test(trimmed)) {
+    return { valid: false, message: 'Folder name contains invalid characters.' };
+  }
+  return { valid: true, message: '' };
+}

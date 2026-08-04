@@ -12,17 +12,30 @@ export interface UseFilesReturn {
   downloadFile: (id: string, fileName: string) => Promise<void>;
 }
 
-export function useFiles(): UseFilesReturn {
+/**
+ * Client-side hook for managing the file list.
+ *
+ * @param folderId - UUID of the current folder, null = root files,
+ *                   undefined = all files (no filter, backward-compatible default).
+ */
+export function useFiles(folderId?: string | null): UseFilesReturn {
   // isLoading starts as true — the effect never needs a synchronous setState call
   const [files, setFiles] = useState<FileListItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Build the API URL based on the optional folderId
+  const buildUrl = useCallback((): string => {
+    if (folderId === undefined) return '/api/files';
+    if (folderId === null) return '/api/files?folderId=root';
+    return `/api/files?folderId=${encodeURIComponent(folderId)}`;
+  }, [folderId]);
+
   // Internal fetch helper — all setState calls live inside .then()/.catch()
   // callbacks (async), so they are never "synchronous within an effect body".
   // This mirrors the same pattern used in hooks/useAuth.ts.
   const load = useCallback((): void => {
-    fetch('/api/files')
+    fetch(buildUrl())
       .then((res) => res.json() as Promise<ApiResponse<FileListItem[]>>)
       .then(({ data, error: apiError }) => {
         if (apiError) {
@@ -36,7 +49,7 @@ export function useFiles(): UseFilesReturn {
         setError(err instanceof Error ? err.message : 'Failed to load files.');
         setIsLoading(false);
       });
-  }, []);
+  }, [buildUrl]);
 
   // Manual refresh — resets loading state then re-fetches.
   // The setIsLoading call is synchronous here but it is called from an event
@@ -47,9 +60,9 @@ export function useFiles(): UseFilesReturn {
     load();
   }, [load]);
 
-  // Initial mount: start the fetch. We call `load` (not `fetchFiles`) so that
-  // no synchronous setState runs in the effect body — all state mutations
-  // happen inside Promise callbacks.
+  // Initial mount / folderId change: start the fetch. We call `load` (not
+  // `fetchFiles`) so that no synchronous setState runs in the effect body —
+  // all state mutations happen inside Promise callbacks.
   useEffect(() => {
     load();
   }, [load]);

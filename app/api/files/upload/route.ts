@@ -1,6 +1,8 @@
 // =============================================================
 // POST /api/files/upload — upload a file for the authenticated user
-// Expects multipart/form-data with a single "file" field.
+// Expects multipart/form-data with:
+//   file      (required) — the file to upload
+//   folderId  (optional) — UUID of the destination folder
 // =============================================================
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,6 +22,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
   }
 
   const file = formData.get('file');
+  const folderIdRaw = formData.get('folderId');
 
   if (!file || !(file instanceof File)) {
     return NextResponse.json(
@@ -28,9 +31,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
     );
   }
 
+  // folderId is optional — null means root
+  const folderId = typeof folderIdRaw === 'string' && folderIdRaw.length > 0
+    ? folderIdRaw
+    : null;
+
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const result = await uploadFile(arrayBuffer, file.name, file.type, file.size);
+    const result = await uploadFile(arrayBuffer, file.name, file.type, file.size, folderId);
 
     return NextResponse.json({ data: result, error: null, status: 201 }, { status: 201 });
   } catch (err: unknown) {
@@ -45,7 +53,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiRespon
       message.includes('not allowed') ||
       message.includes('cannot be empty') ||
       message.includes('invalid characters') ||
-      message.includes('not valid')
+      message.includes('not valid') ||
+      message.includes('folder not found')
     ) {
       return NextResponse.json({ data: null, error: message, status: 422 }, { status: 422 });
     }

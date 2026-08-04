@@ -1,14 +1,15 @@
 # TODO
 
-## 🔴 Critical (Before using Storage API)
+## 🔴 Critical (Before using Storage or Folder API)
 
 - [ ] **Run Supabase SQL migration** — Execute SQL in `docs/supabase-setup.md` first (profiles table + RLS + trigger).
 - [ ] **Run Storage SQL migration** — Execute SQL in `docs/storage-setup.md` (file_metadata table + RLS + Storage bucket + Storage bucket RLS).
+- [ ] **Run Folder SQL migration** — Execute SQL in `docs/folder-setup.md` (folders table + RLS + folder_id column on file_metadata).
 - [ ] **Configure Supabase Auth settings** — Set Site URL and Redirect URLs in Dashboard → Authentication → URL Configuration.
 
 ---
 
-## 🟡 Agent-05+: Additional Features
+## 🟡 Agent-06+: Additional Features
 
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader (URL → cloud)
@@ -20,6 +21,8 @@
 - [ ] Add rate limiting on upload and auth routes
 - [ ] Add file preview (image thumbnails in grid view)
 - [ ] Update Dashboard stats (total files, storage used, last activity) using `/api/files`
+- [ ] Add file move between folders (drag & drop or context menu)
+- [ ] Add folder move / nested folder drag & drop
 
 ---
 
@@ -46,14 +49,13 @@
 - [x] Storage RLS policies (user isolation via path prefix + DB RLS)
 - [x] `file_metadata` table with RLS
 - [x] `services/storage.service.ts` — upload, list, signed URL, delete
-- [x] `GET /api/files` — list user's files
-- [x] `POST /api/files/upload` — upload file
+- [x] `GET /api/files` — list user's files (supports ?folderId= filter)
+- [x] `POST /api/files/upload` — upload file (supports folderId field)
 - [x] `GET /api/files/[id]` — signed download URL
 - [x] `DELETE /api/files/[id]` — delete file
 - [x] File validation (name, MIME type, size) in `lib/validation.ts`
 - [x] `.env.example` with all storage env vars
-- [x] `/files` page — File Manager UI
-- [x] Grid view and List view
+- [x] `/files` page — File Manager UI (grid/list, search, sort, upload, delete)
 - [x] Drag & drop upload zone (keyboard accessible)
 - [x] Multiple file upload with per-file XHR progress bars
 - [x] File download (signed URL → browser download)
@@ -62,3 +64,9 @@
 - [x] Sort by Name / Size / Date (asc/desc toggle)
 - [x] Empty state, loading state, error state, no-results state
 - [x] Mobile + Tablet + Desktop responsive
+- [x] **Folder System — Create Folder** (`POST /api/folders`, `CreateFolderDialog`)
+- [x] **Folder System — Rename Folder** (`PATCH /api/folders/:id`, `RenameFolderDialog`)
+- [x] **Folder System — Delete Folder** (`DELETE /api/folders/:id`, `DeleteFolderDialog`)
+- [x] **Folder System — Breadcrumb Navigation** (`GET /api/folders/:id/path`, `Breadcrumb` component)
+- [x] **Folder System — Folder List UI** (`FolderCard`, `FolderRow`, integrated in `/files` page)
+- [x] **Folder SQL Migration** (docs/folder-setup.md — idempotent, can run multiple times)
