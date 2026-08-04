@@ -9,7 +9,7 @@
 
 ---
 
-## 🟡 Agent-06+: Additional Features
+## 🟡 Agent-07+: Additional Features
 
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader (URL → cloud)
@@ -19,7 +19,7 @@
 - [ ] Configure Render deployment (`render.yaml`)
 - [ ] Add testing setup (Jest / Vitest + Testing Library)
 - [ ] Add rate limiting on upload and auth routes
-- [ ] Add file preview (image thumbnails in grid view)
+- [ ] Add image thumbnails in grid view (inline preview without opening dialog)
 - [ ] Update Dashboard stats (total files, storage used, last activity) using `/api/files`
 - [ ] Add file move between folders (drag & drop or context menu)
 - [ ] Add folder move / nested folder drag & drop
@@ -70,3 +70,10 @@
 - [x] **Folder System — Breadcrumb Navigation** (`GET /api/folders/:id/path`, `Breadcrumb` component)
 - [x] **Folder System — Folder List UI** (`FolderCard`, `FolderRow`, integrated in `/files` page)
 - [x] **Folder SQL Migration** (docs/folder-setup.md — idempotent, can run multiple times)
+- [x] **File Preview System — Image** (jpg, jpeg, png, gif, webp, svg+xml) via `PreviewDialog`
+- [x] **File Preview System — PDF** (inline iframe preview) via `PreviewDialog`
+- [x] **File Preview System — Video** (mp4, webm, ogg) via `PreviewDialog`
+- [x] **File Preview System — Audio** (mp3/mpeg, wav, ogg) via `PreviewDialog`
+- [x] **File Preview System — File Info Panel** (name, type, MIME, size, upload date)
+- [x] **File Preview System — Download Button** in preview dialog
+- [x] **File Preview System — Responsive** (mobile bottom sheet, tablet/desktop modal)

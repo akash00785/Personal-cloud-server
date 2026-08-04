@@ -4,17 +4,21 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { formatBytes, formatDate, truncate } from '@/lib/utils';
 import { FileIcon, getMimeLabel } from '@/components/files/FileIcon';
+import { isPreviewable } from '@/components/files/PreviewDialog';
 import type { FileListItem } from '@/types';
 
 interface FileCardProps {
   file: FileListItem;
   onDownload: (id: string, fileName: string) => Promise<void>;
   onDelete: (file: FileListItem) => void;
+  onPreview: (file: FileListItem) => void;
 }
 
-export function FileCard({ file, onDownload, onDelete }: FileCardProps): React.JSX.Element {
+export function FileCard({ file, onDownload, onDelete, onPreview }: FileCardProps): React.JSX.Element {
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const canPreview = isPreviewable(file.mimeType);
 
   const handleDownload = async (): Promise<void> => {
     setIsDownloading(true);
@@ -39,20 +43,42 @@ export function FileCard({ file, onDownload, onDelete }: FileCardProps): React.J
     >
       {/* Icon + type badge */}
       <div className="flex items-start justify-between">
-        <FileIcon mimeType={file.mimeType} size="lg" />
+        {/* Clicking the icon opens preview if available */}
+        <button
+          onClick={() => canPreview && onPreview(file)}
+          disabled={!canPreview}
+          className={cn(
+            'rounded-lg transition-opacity',
+            canPreview
+              ? 'cursor-pointer opacity-100 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+              : 'cursor-default'
+          )}
+          aria-label={canPreview ? `Preview ${file.fileName}` : undefined}
+          tabIndex={canPreview ? 0 : -1}
+        >
+          <FileIcon mimeType={file.mimeType} size="lg" />
+        </button>
         <span className="rounded-md bg-zinc-800 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-400">
           {getMimeLabel(file.mimeType)}
         </span>
       </div>
 
-      {/* File name */}
+      {/* File name — clicking opens preview */}
       <div className="min-w-0">
-        <p
-          className="text-sm font-medium leading-snug text-zinc-100"
+        <button
+          onClick={() => canPreview && onPreview(file)}
+          disabled={!canPreview}
+          className={cn(
+            'w-full text-left text-sm font-medium leading-snug text-zinc-100',
+            canPreview
+              ? 'cursor-pointer hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+              : 'cursor-default'
+          )}
           title={file.fileName}
+          tabIndex={canPreview ? 0 : -1}
         >
           {truncate(file.fileName, 36)}
-        </p>
+        </button>
         <p className="mt-0.5 text-xs text-zinc-500">{formatBytes(file.fileSize)}</p>
       </div>
 
@@ -71,6 +97,33 @@ export function FileCard({ file, onDownload, onDelete }: FileCardProps): React.J
           'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
         )}
       >
+        {/* Preview button — only shown for previewable types */}
+        {canPreview && (
+          <button
+            onClick={() => onPreview(file)}
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800',
+              'text-zinc-400 transition-colors hover:border-blue-700 hover:bg-blue-900/20 hover:text-blue-400',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+            )}
+            aria-label={`Preview ${file.fileName}`}
+            title="Preview"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        )}
+
+        {/* Download */}
         <button
           onClick={() => void handleDownload()}
           disabled={isDownloading}
@@ -78,7 +131,8 @@ export function FileCard({ file, onDownload, onDelete }: FileCardProps): React.J
             'flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5',
             'text-xs font-medium text-zinc-300 transition-colors',
             'hover:border-zinc-600 hover:bg-zinc-700 hover:text-white',
-            'disabled:pointer-events-none disabled:opacity-50'
+            'disabled:pointer-events-none disabled:opacity-50',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
           )}
           aria-label={`Download ${file.fileName}`}
         >
@@ -101,12 +155,14 @@ export function FileCard({ file, onDownload, onDelete }: FileCardProps): React.J
           Download
         </button>
 
+        {/* Delete */}
         <button
           onClick={() => onDelete(file)}
           className={cn(
             'flex items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5',
             'text-xs font-medium text-zinc-400 transition-colors',
-            'hover:border-red-800 hover:bg-red-900/20 hover:text-red-400'
+            'hover:border-red-800 hover:bg-red-900/20 hover:text-red-400',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
           )}
           aria-label={`Delete ${file.fileName}`}
         >

@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.6.0] — 2026-08-04
+
+### Agent-06 — File Preview System
+
+#### Added
+- **`hooks/useFilePreview.ts`** — Client hook: fetches signed URL for preview on demand; all setState in Promise callbacks (satisfies `react-hooks/set-state-in-effect`)
+- **`components/files/PreviewDialog.tsx`** — Full preview dialog:
+  - `isPreviewable(mimeType)` — exported helper used by FileCard / FileRow to conditionally show Preview button
+  - Image preview: `jpg`, `jpeg`, `png`, `gif`, `webp`, `svg+xml`, `bmp`, `tiff` — uses `<img>` with error fallback
+  - PDF preview: `application/pdf` — uses `<iframe>` for inline rendering
+  - Video preview: `mp4`, `webm`, `ogg`, `quicktime` — uses `<video controls>`
+  - Audio preview: `mpeg`, `wav`, `ogg`, `flac`, `aac`, `webm` — uses `<audio controls>` with waveform decoration
+  - Unsupported types: graceful "Preview not available" state with file icon
+  - File Information Panel: File Name, Type, MIME Type, Size, Upload Date
+  - Download button in footer (reuses existing `downloadFile` hook)
+  - Responsive: bottom sheet on mobile, centered modal on tablet/desktop
+  - Keyboard: Escape to close, focus management on open
+  - Loading state (spinner), error state, image-load-error fallback
+
+#### Changed
+- **`components/files/FileCard.tsx`** — Added `onPreview` prop; Preview button (eye icon) on hover for previewable types; file name and icon are clickable to open preview
+- **`components/files/FileRow.tsx`** — Added `onPreview` prop; Preview button added to action group for previewable types; file name and icon are clickable to open preview
+- **`app/(protected)/files/page.tsx`** — Added `pendingPreviewFile` state, `handlePreviewOpen`/`handlePreviewClose` callbacks, `<PreviewDialog>` wired up; all existing folder and file dialogs unchanged
+
+#### Security / Quality
+- No API routes modified
+- No database schema modified
+- No authentication changed
+- No folder system changed
+- `npm audit`: 0 vulnerabilities | Build: ✓ | ESLint: ✓ | TypeScript: ✓
+
+---
+
 ## [0.5.0] — 2026-08-04
 
 ### Agent-05 — Folder System

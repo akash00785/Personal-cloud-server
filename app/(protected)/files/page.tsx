@@ -12,6 +12,7 @@ import { UploadQueue } from '@/components/files/UploadQueue';
 import { FileCard } from '@/components/files/FileCard';
 import { FileRow } from '@/components/files/FileRow';
 import { DeleteDialog } from '@/components/files/DeleteDialog';
+import { PreviewDialog } from '@/components/files/PreviewDialog';
 import { Breadcrumb } from '@/components/folders/Breadcrumb';
 import { FolderCard } from '@/components/folders/FolderCard';
 import { FolderRow } from '@/components/folders/FolderRow';
@@ -66,6 +67,9 @@ function FilesPageContent(): React.JSX.Element {
 
   // File delete dialog
   const [pendingDeleteFile, setPendingDeleteFile] = useState<FileListItem | null>(null);
+
+  // File preview dialog
+  const [pendingPreviewFile, setPendingPreviewFile] = useState<FileListItem | null>(null);
 
   // Folder dialogs
   const [showCreateFolder, setShowCreateFolder] = useState<boolean>(false);
@@ -138,6 +142,14 @@ function FilesPageContent(): React.JSX.Element {
     await removeFile(pendingDeleteFile.id);
     setPendingDeleteFile(null);
   }, [pendingDeleteFile, removeFile]);
+
+  const handlePreviewOpen = useCallback((file: FileListItem): void => {
+    setPendingPreviewFile(file);
+  }, []);
+
+  const handlePreviewClose = useCallback((): void => {
+    setPendingPreviewFile(null);
+  }, []);
 
   // ── Folder handlers ───────────────────────────────────────────────────────────
   const handleCreateFolder = useCallback(
@@ -372,6 +384,7 @@ function FilesPageContent(): React.JSX.Element {
                   file={file}
                   onDownload={downloadFile}
                   onDelete={(f) => setPendingDeleteFile(f)}
+                  onPreview={handlePreviewOpen}
                 />
               </div>
             ))}
@@ -418,6 +431,7 @@ function FilesPageContent(): React.JSX.Element {
                     file={file}
                     onDownload={downloadFile}
                     onDelete={(f) => setPendingDeleteFile(f)}
+                    onPreview={handlePreviewOpen}
                   />
                 </li>
               ))}
@@ -427,6 +441,15 @@ function FilesPageContent(): React.JSX.Element {
       </div>
 
       {/* ── Dialogs ────────────────────────────────────────────────────────────── */}
+
+      {/* File preview */}
+      <PreviewDialog
+        key={pendingPreviewFile?.id ?? 'no-preview'}
+        isOpen={pendingPreviewFile !== null}
+        file={pendingPreviewFile}
+        onClose={handlePreviewClose}
+        onDownload={downloadFile}
+      />
 
       {/* File delete confirmation */}
       <DeleteDialog

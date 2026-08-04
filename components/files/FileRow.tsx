@@ -4,17 +4,21 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { formatBytes, formatDate, truncate } from '@/lib/utils';
 import { FileIcon, getMimeLabel } from '@/components/files/FileIcon';
+import { isPreviewable } from '@/components/files/PreviewDialog';
 import type { FileListItem } from '@/types';
 
 interface FileRowProps {
   file: FileListItem;
   onDownload: (id: string, fileName: string) => Promise<void>;
   onDelete: (file: FileListItem) => void;
+  onPreview: (file: FileListItem) => void;
 }
 
-export function FileRow({ file, onDownload, onDelete }: FileRowProps): React.JSX.Element {
+export function FileRow({ file, onDownload, onDelete, onPreview }: FileRowProps): React.JSX.Element {
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  const canPreview = isPreviewable(file.mimeType);
 
   const handleDownload = async (): Promise<void> => {
     setIsDownloading(true);
@@ -37,17 +41,38 @@ export function FileRow({ file, onDownload, onDelete }: FileRowProps): React.JSX
       )}
       aria-label={`File: ${file.fileName}`}
     >
-      {/* Icon */}
-      <FileIcon mimeType={file.mimeType} size="sm" className="shrink-0" />
+      {/* Icon — clicking opens preview */}
+      <button
+        onClick={() => canPreview && onPreview(file)}
+        disabled={!canPreview}
+        className={cn(
+          'shrink-0 rounded-lg transition-opacity',
+          canPreview
+            ? 'cursor-pointer hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+            : 'cursor-default'
+        )}
+        aria-label={canPreview ? `Preview ${file.fileName}` : undefined}
+        tabIndex={canPreview ? 0 : -1}
+      >
+        <FileIcon mimeType={file.mimeType} size="sm" />
+      </button>
 
       {/* Name + error */}
       <div className="min-w-0 flex-1">
-        <p
-          className="truncate text-sm font-medium text-zinc-100"
+        <button
+          onClick={() => canPreview && onPreview(file)}
+          disabled={!canPreview}
+          className={cn(
+            'w-full truncate text-left text-sm font-medium text-zinc-100',
+            canPreview
+              ? 'cursor-pointer hover:text-blue-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+              : 'cursor-default'
+          )}
           title={file.fileName}
+          tabIndex={canPreview ? 0 : -1}
         >
           {file.fileName}
-        </p>
+        </button>
         {downloadError && (
           <p className="text-xs text-red-400">{downloadError}</p>
         )}
@@ -80,13 +105,41 @@ export function FileRow({ file, onDownload, onDelete }: FileRowProps): React.JSX
           'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
         )}
       >
+        {/* Preview */}
+        {canPreview && (
+          <button
+            onClick={() => onPreview(file)}
+            className={cn(
+              'flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800',
+              'text-zinc-400 transition-colors hover:border-blue-700 hover:bg-blue-900/20 hover:text-blue-400',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+            )}
+            aria-label={`Preview ${file.fileName}`}
+            title={`Preview ${truncate(file.fileName, 24)}`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-3.5 w-3.5"
+              aria-hidden="true"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        )}
+
+        {/* Download */}
         <button
           onClick={() => void handleDownload()}
           disabled={isDownloading}
           className={cn(
             'flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800',
             'text-zinc-400 transition-colors hover:border-zinc-600 hover:text-white',
-            'disabled:pointer-events-none disabled:opacity-50'
+            'disabled:pointer-events-none disabled:opacity-50',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
           )}
           aria-label={`Download ${file.fileName}`}
           title={`Download ${truncate(file.fileName, 24)}`}
@@ -109,11 +162,13 @@ export function FileRow({ file, onDownload, onDelete }: FileRowProps): React.JSX
           )}
         </button>
 
+        {/* Delete */}
         <button
           onClick={() => onDelete(file)}
           className={cn(
             'flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800',
-            'text-zinc-400 transition-colors hover:border-red-800 hover:bg-red-900/20 hover:text-red-400'
+            'text-zinc-400 transition-colors hover:border-red-800 hover:bg-red-900/20 hover:text-red-400',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
           )}
           aria-label={`Delete ${file.fileName}`}
           title={`Delete ${truncate(file.fileName, 24)}`}

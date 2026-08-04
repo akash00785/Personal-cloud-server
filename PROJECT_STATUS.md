@@ -1,8 +1,8 @@
 # Project Status
 
 **Last Updated:** 2026-08-04
-**Agent:** Agent-05 (Folder System)
-**Phase:** Folder System — Create, Rename, Delete, Breadcrumb Navigation, Folder List UI
+**Agent:** Agent-06 (File Preview System)
+**Phase:** File Preview System — Image, PDF, Video, Audio, Responsive Dialog, File Info Panel
 
 ---
 
@@ -157,7 +157,18 @@ docs/
 
 ---
 
-## 📝 Notes for Agent-06
+## ✅ Completed Tasks (Agent-06 — File Preview System)
+
+- [x] **`hooks/useFilePreview.ts`** — fetches signed URL on demand
+- [x] **`components/files/PreviewDialog.tsx`** — full preview dialog (image, PDF, video, audio, info panel, download button)
+- [x] **`components/files/FileCard.tsx`** — `onPreview` prop + Preview button
+- [x] **`components/files/FileRow.tsx`** — `onPreview` prop + Preview button
+- [x] **`app/(protected)/files/page.tsx`** — preview state wired up
+- [x] **Build** — zero errors | **ESLint** — zero errors | **TypeScript** — zero errors | **npm audit** — 0 vulnerabilities
+
+---
+
+## 📝 Notes for Agent-07
 
 1. **Run SQL migration** — `docs/folder-setup.md` must be executed in Supabase Dashboard before folders work
 2. **Folder API is complete** — `/api/folders` (list/create), `/api/folders/:id` (rename/delete), `/api/folders/:id/path` (breadcrumb)
