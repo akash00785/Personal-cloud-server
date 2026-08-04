@@ -1,14 +1,14 @@
 # Project Status
 
 **Last Updated:** 2026-08-04
-**Agent:** Agent-02
-**Phase:** Authentication & User System
+**Agent:** Agent-02 (Security Audit)
+**Phase:** Authentication & User System — Security Hardened
 
 ---
 
 ## ✅ Completed Tasks (Agent-01)
 
-- [x] Bootstrapped Next.js 15/16 with TypeScript, Tailwind CSS v4, App Router
+- [x] Bootstrapped Next.js 16 with TypeScript, Tailwind CSS v4, App Router
 - [x] Configured ESLint and Prettier
 - [x] Created clean folder structure
 - [x] Installed Supabase client packages (`@supabase/supabase-js`, `@supabase/ssr`)
@@ -16,45 +16,51 @@
 - [x] Configured dark theme (zinc palette)
 - [x] Created reusable layout components (Header, Footer, Sidebar, PageWrapper)
 - [x] Created reusable UI components (Button, Input, Card, Badge, Spinner)
-- [x] Created shared utility library (`lib/utils.ts`)
-- [x] Created app-wide constants and global TypeScript types
+- [x] Created shared utility library, constants, and global TypeScript types
 - [x] Created custom hooks (`useLocalStorage`, `useTheme`, `useMediaQuery`)
 - [x] Created root layout, home page, error, not-found, loading pages
-- [x] Build passing — zero errors, zero warnings
+- [x] Build passing — zero errors
 
 ---
 
-## ✅ Completed Tasks (Agent-02)
+## ✅ Completed Tasks (Agent-02 — Auth)
 
-- [x] Configured `.env.local` with real Supabase credentials
-- [x] Updated `proxy.ts` (Next.js 16 proxy = middleware) — protected routes + session refresh
-- [x] Created Server Actions: `signUp`, `signIn`, `signOut`, `updateProfile` (`app/auth/actions.ts`)
-- [x] Created Email/Password Sign Up page (`app/auth/signup/page.tsx`)
-- [x] Created Email/Password Login page (`app/auth/login/page.tsx`)
-- [x] Created Auth layout (`app/auth/layout.tsx`)
-- [x] Created Auth callback route for email confirmation (`app/auth/callback/route.ts`)
-- [x] Created Protected route group `(protected)` with server-side auth guard
-- [x] Created Dashboard page (`app/(protected)/dashboard/page.tsx`)
-- [x] Created Profile page (`app/(protected)/profile/page.tsx`)
-- [x] Created `ProfileForm` client component with update support
-- [x] Created `SignOutButton` client component
-- [x] Created `useAuth` hook for client-side auth state management
-- [x] Created `services/auth.service.ts` — `getProfile()`, `ensureProfile()`
-- [x] Updated `Header` component — auth-aware (sign in/up links or user name + sign-out)
-- [x] Updated `Sidebar` component — navigation links with active state
-- [x] Updated Home page — shows Dashboard button when authenticated
-- [x] Updated `types/index.ts` — added `ProfileRow` type
-- [x] Updated `services/supabase.service.ts` — re-exports auth helpers
-- [x] Created `docs/supabase-setup.md` — SQL migration guide for `profiles` table
-- [x] Build passing — zero errors
-- [x] Lint passing — zero errors
+- [x] Configured `.env.local` with Supabase credentials
+- [x] Updated `proxy.ts` — protected routes + session refresh
+- [x] Created Server Actions: `signUp`, `signIn`, `signOut`, `updateProfile`
+- [x] Created Email/Password Sign Up and Login pages
+- [x] Created Auth layout and callback route
+- [x] Created protected route group `(protected)` with server-side auth guard
+- [x] Created Dashboard and Profile pages
+- [x] Created `ProfileForm` and `SignOutButton` client components
+- [x] Created `useAuth` hook for client-side auth state
+- [x] Created `services/auth.service.ts`
+- [x] Updated Header (auth-aware), Sidebar, Home page
+- [x] Created `docs/supabase-setup.md` — SQL migration guide
+
+---
+
+## ✅ Completed Tasks (Agent-02 — Security Audit)
+
+- [x] **Fixed Open Redirect** — `sanitizeRedirectPath()` in `lib/validation.ts`; login page now validates `redirectTo` is a safe relative path only
+- [x] **Added Server-side Input Validation** — `lib/validation.ts` with `isValidEmail`, `isValidPassword`, `isValidDisplayName`, `isValidAvatarUrl`; all Server Actions now validate inputs before touching the database
+- [x] **Verified no hardcoded credentials** — grep confirmed zero hardcoded secrets in source files
+- [x] **Verified `.gitignore`** — `.env*` and `.env.local` are excluded; confirmed not committed
+- [x] **Verified RLS** — `docs/supabase-setup.md` defines full RLS policies (SELECT/UPDATE/INSERT per-user) + trigger
+- [x] **Verified no XSS risk** — no `dangerouslySetInnerHTML`, React escapes all output by default
+- [x] **Verified CSRF protection** — Next.js 16 Server Actions validate `Origin` header automatically
+- [x] **Verified SQL Injection immunity** — Supabase uses PostgREST parameterized queries; no raw SQL in app code
+- [x] **Verified cookie security** — `@supabase/ssr` sets `sameSite: 'lax'` (CSRF safe); `httpOnly: false` is intentional by Supabase (client JS must read tokens to sync state)
+- [x] **Verified double auth guard** — proxy.ts + `(protected)/layout.tsx` both independently check auth
+- [x] **npm audit** — 0 known vulnerabilities in dependencies
+- [x] **Build** — zero errors, zero warnings
+- [x] **ESLint** — zero errors, zero warnings
 
 ---
 
 ## 🔲 Remaining Tasks (for Agent-03+)
 
 - [ ] **⚠️ Run Supabase SQL migration** (see `docs/supabase-setup.md`) — profiles table + RLS + trigger
-- [ ] Create dashboard page with real file overview
 - [ ] Create file manager page (`/files`)
 - [ ] Implement file upload / download API routes
 - [ ] Connect Google Drive integration
@@ -62,6 +68,7 @@
 - [ ] Implement media streaming
 - [ ] Implement search functionality
 - [ ] Create Settings page (`/settings`)
+- [ ] **Future: Add rate limiting** on sign-in/sign-up routes (Supabase has built-in limits, app-level not yet added)
 - [ ] Configure Render deployment (render.yaml)
 - [ ] Add testing setup (Jest / Vitest + Testing Library)
 
@@ -80,17 +87,6 @@
 | `clsx` | ^2 | Conditional classnames |
 | `tailwind-merge` | ^3 | Tailwind class merging |
 
-### Dev Dependencies
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `typescript` | ^5 | Type checking |
-| `tailwindcss` | ^4 | Styling |
-| `@tailwindcss/postcss` | ^4 | Tailwind PostCSS plugin |
-| `eslint` | ^9 | Linting |
-| `eslint-config-next` | 16.x | Next.js ESLint config |
-| `prettier` | ^3 | Code formatting |
-| `prettier-plugin-tailwindcss` | ^0.6 | Tailwind class sorting |
-
 ---
 
 ## 📁 Folder Structure
@@ -99,46 +95,44 @@
 Personal-cloud-server/
 ├── app/
 │   ├── (protected)/
-│   │   ├── layout.tsx          # Server-side auth guard for protected pages
-│   │   ├── dashboard/page.tsx  # Dashboard page
-│   │   └── profile/page.tsx    # Profile page
+│   │   ├── layout.tsx          # Server-side auth guard (2nd layer)
+│   │   ├── dashboard/page.tsx
+│   │   └── profile/page.tsx
 │   ├── auth/
-│   │   ├── layout.tsx          # Auth layout (centered card)
-│   │   ├── login/page.tsx      # Email/password login
-│   │   ├── signup/page.tsx     # Email/password sign up
-│   │   ├── callback/route.ts   # OAuth/email confirmation callback
-│   │   └── actions.ts          # Server Actions: signIn, signUp, signOut, updateProfile
+│   │   ├── layout.tsx
+│   │   ├── login/page.tsx      # Uses sanitizeRedirectPath (open redirect fix)
+│   │   ├── signup/page.tsx
+│   │   ├── callback/route.ts
+│   │   └── actions.ts          # Server-side validated signIn/signUp/signOut/updateProfile
 │   ├── globals.css
-│   ├── layout.tsx              # Root layout
-│   ├── page.tsx                # Home page (auth-aware)
+│   ├── layout.tsx
+│   ├── page.tsx
 │   ├── error.tsx
 │   ├── not-found.tsx
 │   └── loading.tsx
 ├── components/
-│   ├── auth/
-│   │   └── SignOutButton.tsx   # Client component for sign-out
-│   ├── profile/
-│   │   └── ProfileForm.tsx     # Client component for profile editing
+│   ├── auth/SignOutButton.tsx
+│   ├── profile/ProfileForm.tsx
 │   ├── ui/                     # Button, Input, Card, Badge, Spinner
-│   └── layout/                 # Header (auth-aware), Footer, Sidebar, PageWrapper
+│   └── layout/                 # Header, Footer, Sidebar, PageWrapper
 ├── hooks/
-│   ├── useAuth.ts              # Client-side auth state hook
+│   ├── useAuth.ts
 │   ├── useLocalStorage.ts
 │   ├── useTheme.ts
 │   └── useMediaQuery.ts
-├── services/
-│   ├── auth.service.ts         # getProfile(), ensureProfile()
-│   └── supabase.service.ts
 ├── lib/
 │   ├── supabase/               # client.ts, server.ts, middleware.ts
+│   ├── validation.ts           # isValidEmail, isValidPassword, sanitizeRedirectPath…
 │   ├── utils.ts
-│   └── constants.ts            # AUTH_ROUTES, PROTECTED_ROUTES added
-├── types/
-│   └── index.ts                # UserProfile, ProfileRow, CloudFile, NavItem
+│   └── constants.ts
+├── services/
+│   ├── auth.service.ts
+│   └── supabase.service.ts
+├── types/index.ts
 ├── docs/
 │   ├── architecture.md
-│   └── supabase-setup.md       # SQL migration + RLS policies guide
-├── proxy.ts                    # Next.js 16 proxy (session refresh + route protection)
+│   └── supabase-setup.md
+├── proxy.ts                    # Session refresh + protected route guard (1st layer)
 └── .env.example
 ```
 
@@ -146,10 +140,8 @@ Personal-cloud-server/
 
 ## 📝 Notes for Agent-03
 
-1. **Run the Supabase SQL migration first** — See `docs/supabase-setup.md`. The `profiles` table, RLS policies, and the `handle_new_user` trigger must exist before sign-up works correctly.
-2. **Email confirmation** — By default Supabase requires email confirmation. If testing locally, disable it in the Supabase Dashboard (Authentication → Providers → Email → disable "Confirm email").
-3. **Dark theme is default** — All components are dark-first. Use `cn()` for conditional classes.
-4. **Server Actions** — Auth flows use Next.js Server Actions (`app/auth/actions.ts`). Add new server actions there.
-5. **Protected routes** — Wrap any new protected page inside `app/(protected)/`. The layout already checks auth server-side and redirects to `/auth/login` if not authenticated.
-6. **`@/` alias** — Use for all imports (configured in `tsconfig.json`).
-7. **Supabase clients** — `lib/supabase/client.ts` for Client Components, `lib/supabase/server.ts` for Server Components and Route Handlers.
+1. **Run Supabase SQL migration first** — `docs/supabase-setup.md`
+2. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
+3. **Server Actions** for new features go in `app/<feature>/actions.ts`; always call `supabase.auth.getUser()` first for authorization
+4. **`lib/validation.ts`** — use these helpers for any new input validation
+5. **Dark theme, `cn()`, `@/` alias** — always follow PROJECT_RULES.md

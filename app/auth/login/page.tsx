@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useActionState, Suspense } from 'react';
 import { signIn } from '@/app/auth/actions';
+import { sanitizeRedirectPath } from '@/lib/validation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -11,7 +12,9 @@ import { Card } from '@/components/ui/Card';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') ?? '/dashboard';
+
+  // Sanitize redirectTo to prevent open redirect attacks
+  const redirectTo = sanitizeRedirectPath(searchParams.get('redirectTo'), '/dashboard');
   const urlError = searchParams.get('error');
 
   const [state, formAction, isPending] = useActionState(
@@ -57,20 +60,24 @@ function LoginForm() {
           disabled={isPending}
         />
 
-        <div className="flex flex-col gap-1">
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            label="Password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-            disabled={isPending}
-          />
-        </div>
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          label="Password"
+          placeholder="••••••••"
+          autoComplete="current-password"
+          required
+          disabled={isPending}
+        />
 
-        <Button type="submit" variant="primary" size="lg" isLoading={isPending} className="mt-2 w-full">
+        <Button
+          type="submit"
+          variant="primary"
+          size="lg"
+          isLoading={isPending}
+          className="mt-2 w-full"
+        >
           {isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
@@ -80,7 +87,11 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="h-64 w-full max-w-md animate-pulse rounded-xl bg-zinc-900" />}>
+    <Suspense
+      fallback={
+        <div className="h-64 w-full max-w-md animate-pulse rounded-xl bg-zinc-900" />
+      }
+    >
       <LoginForm />
     </Suspense>
   );
