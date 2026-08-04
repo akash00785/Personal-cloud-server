@@ -4,6 +4,10 @@ This document contains all SQL and configuration steps required to set up the
 `personal-files` storage bucket and the `file_metadata` table with full Row
 Level Security (RLS) and user isolation.
 
+> **Idempotent:** Every statement in this guide uses `IF NOT EXISTS`, `CREATE OR REPLACE`,
+> `ON CONFLICT DO NOTHING`, or `DROP … IF EXISTS` guards — the entire script can be run
+> multiple times without errors or data loss.
+
 ---
 
 ## 1. Create the `file_metadata` Table
@@ -14,6 +18,7 @@ Run this in **Supabase Dashboard → SQL Editor → New query**:
 -- ──────────────────────────────────────────────────────────────────────────
 -- file_metadata: stores metadata for every file uploaded to Storage.
 -- The actual bytes live in the 'personal-files' Storage bucket.
+-- Safe to run multiple times (fully idempotent).
 -- ──────────────────────────────────────────────────────────────────────────
 
 CREATE TABLE IF NOT EXISTS public.file_metadata (
@@ -40,35 +45,37 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER file_metadata_updated_at
+-- Trigger: DROP IF EXISTS first so re-runs don't error
+DROP TRIGGER IF EXISTS file_metadata_updated_at ON public.file_metadata;
+CREATE TRIGGER file_metadata_updated_at
   BEFORE UPDATE ON public.file_metadata
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
--- Enable Row Level Security
+-- Enable Row Level Security (idempotent — no-op if already enabled)
 ALTER TABLE public.file_metadata ENABLE ROW LEVEL SECURITY;
 
--- ── RLS Policies ────────────────────────────────────────────────────────────
+-- ── RLS Policies (DROP IF EXISTS → CREATE pattern is idempotent) ──────────
 
--- SELECT: users can only see their own files
+DROP POLICY IF EXISTS "Users can view own files"   ON public.file_metadata;
 CREATE POLICY "Users can view own files"
   ON public.file_metadata
   FOR SELECT
   USING (auth.uid() = owner_id);
 
--- INSERT: users can only insert rows where owner_id matches their own UID
+DROP POLICY IF EXISTS "Users can insert own files" ON public.file_metadata;
 CREATE POLICY "Users can insert own files"
   ON public.file_metadata
   FOR INSERT
   WITH CHECK (auth.uid() = owner_id);
 
--- UPDATE: users can only update their own file rows
+DROP POLICY IF EXISTS "Users can update own files" ON public.file_metadata;
 CREATE POLICY "Users can update own files"
   ON public.file_metadata
   FOR UPDATE
   USING (auth.uid() = owner_id)
   WITH CHECK (auth.uid() = owner_id);
 
--- DELETE: users can only delete their own file rows
+DROP POLICY IF EXISTS "Users can delete own files" ON public.file_metadata;
 CREATE POLICY "Users can delete own files"
   ON public.file_metadata
   FOR DELETE
@@ -102,10 +109,10 @@ application/x-rar-compressed, text/plain, text/csv, text/markdown, text/html,
 text/css, text/javascript, application/json, application/xml, text/xml
 ```
 
-### Option B — SQL (using service role)
+### Option B — SQL (using service role, idempotent)
 
 ```sql
--- Run with Service Role credentials only
+-- ON CONFLICT (id) DO NOTHING makes this safe to re-run
 INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 VALUES (
   'personal-files',
@@ -142,9 +149,11 @@ Run this in **Supabase Dashboard → SQL Editor → New query**:
 -- Storage RLS for the 'personal-files' bucket.
 -- User isolation: each user's files live under storage_path: {userId}/...
 -- auth.uid()::text ensures the path prefix always matches the current user.
+-- Safe to run multiple times (DROP IF EXISTS → CREATE pattern).
 -- ──────────────────────────────────────────────────────────────────────────
 
 -- Allow authenticated users to upload files ONLY under their own user-id folder
+DROP POLICY IF EXISTS "Users can upload to own folder" ON storage.objects;
 CREATE POLICY "Users can upload to own folder"
   ON storage.objects
   FOR INSERT
@@ -155,6 +164,7 @@ CREATE POLICY "Users can upload to own folder"
   );
 
 -- Allow users to read files ONLY from their own folder
+DROP POLICY IF EXISTS "Users can read own files" ON storage.objects;
 CREATE POLICY "Users can read own files"
   ON storage.objects
   FOR SELECT
@@ -165,6 +175,7 @@ CREATE POLICY "Users can read own files"
   );
 
 -- Allow users to update (replace) files in their own folder
+DROP POLICY IF EXISTS "Users can update own files" ON storage.objects;
 CREATE POLICY "Users can update own files"
   ON storage.objects
   FOR UPDATE
@@ -179,6 +190,7 @@ CREATE POLICY "Users can update own files"
   );
 
 -- Allow users to delete files from their own folder
+DROP POLICY IF EXISTS "Users can delete own files" ON storage.objects;
 CREATE POLICY "Users can delete own files"
   ON storage.objects
   FOR DELETE
@@ -188,6 +200,11 @@ CREATE POLICY "Users can delete own files"
     AND (storage.foldername(name))[1] = auth.uid()::text
   );
 ```
+
+> **Note on `DROP POLICY IF EXISTS` on `storage.objects`:**
+> `storage.objects` is shared across all buckets. The policies above are
+> bucket-scoped (`bucket_id = 'personal-files'`), so dropping and recreating
+> them is safe and only affects the `personal-files` bucket.
 
 ---
 
@@ -204,7 +221,23 @@ Three independent layers must all be bypassed simultaneously to access another u
 
 ---
 
-## 5. Verification Checklist
+## 5. Idempotency Summary
+
+| Statement | Safe to re-run? | Guard used |
+|-----------|-----------------|------------|
+| `CREATE TABLE IF NOT EXISTS` | ✅ | `IF NOT EXISTS` |
+| `CREATE INDEX IF NOT EXISTS` | ✅ | `IF NOT EXISTS` |
+| `CREATE OR REPLACE FUNCTION` | ✅ | `OR REPLACE` |
+| `DROP TRIGGER IF EXISTS` + `CREATE TRIGGER` | ✅ | `DROP IF EXISTS` before create |
+| `ALTER TABLE … ENABLE ROW LEVEL SECURITY` | ✅ | No-op if already enabled |
+| `DROP POLICY IF EXISTS` + `CREATE POLICY` (×8) | ✅ | `DROP IF EXISTS` before create |
+| `INSERT … ON CONFLICT DO NOTHING` | ✅ | `ON CONFLICT DO NOTHING` |
+
+**All statements are idempotent — the script can be run any number of times safely.**
+
+---
+
+## 6. Verification Checklist
 
 After running the SQL above, verify in the Supabase Dashboard:
 
