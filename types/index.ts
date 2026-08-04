@@ -86,6 +86,29 @@ export interface FileValidationResult {
   message: string;
 }
 
+// ---------- File Manager UI ----------
+
+/** Sort field for the file manager */
+export type SortField = 'name' | 'size' | 'date';
+
+/** Sort direction */
+export type SortOrder = 'asc' | 'desc';
+
+/** View mode for the file manager */
+export type ViewMode = 'grid' | 'list';
+
+/** A file currently being uploaded, with progress tracking */
+export interface UploadingFile {
+  /** Locally unique ID for tracking this upload in the queue */
+  id: string;
+  name: string;
+  size: number;
+  /** Upload progress 0–100 */
+  progress: number;
+  status: 'pending' | 'uploading' | 'done' | 'error';
+  error?: string;
+}
+
 // ---------- Navigation ----------
 export interface NavItem {
   label: string;

@@ -4,6 +4,72 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.0] — 2026-08-04
+
+### Agent-04 — File Manager UI
+
+#### Added
+- **`hooks/useFiles.ts`** — Client-side data hook:
+  - `fetchFiles()` — manual refresh, resets loading state then re-fetches
+  - `removeFile(id)` — DELETE `/api/files/[id]`, removes from local state on success
+  - `downloadFile(id, fileName)` — GET `/api/files/[id]` → signed URL → browser download
+  - Pattern: all setState calls are inside `.then()/.catch()` callbacks (never synchronous inside useEffect body — satisfies `react-hooks/set-state-in-effect`)
+- **`hooks/useFileUpload.ts`** — Multiple file upload with per-file XHR progress tracking:
+  - `upload(files)` — sequential XHR uploads; each file gets its own progress 0–100
+  - Calls `onComplete()` callback after any successful upload (triggers file list refresh)
+  - Auto-clears completed items from the queue after 3 s
+  - Exposes `hasActive` flag to disable the upload zone during active uploads
+- **`components/files/FileIcon.tsx`** — Colour-coded SVG icon component:
+  - 10 MIME-type categories (image, video, audio, pdf, document, spreadsheet, presentation, archive, code, text)
+  - `FileIcon` renders the icon; `getMimeLabel()` returns a short type label (e.g. "DOCX", "MP4")
+- **`components/files/UploadZone.tsx`** — Accessible drag & drop upload zone:
+  - Keyboard accessible (`Enter`/`Space` opens file picker)
+  - Drag counter ref prevents flicker on drag-over child elements
+  - Hidden `<input type="file" multiple>` with `ACCEPTED_FILE_TYPES` constraint
+  - Disables itself while uploads are active
+- **`components/files/UploadQueue.tsx`** — Per-file upload progress display:
+  - Progress bar (0–100 %) with animated fill for each uploading file
+  - Status icons: spinner → success check → error × per item
+  - Inline error message per failed item
+  - Summary header counts active / done / failed files
+  - "Clear" button dismisses the queue once all uploads finish
+- **`components/files/FileCard.tsx`** — Grid view card:
+  - Large file icon, type badge, truncated name, size, upload date
+  - Download + delete action buttons; fade in on hover (always visible on touch)
+  - Download error shown inline with auto-clear after 4 s
+- **`components/files/FileRow.tsx`** — List view row:
+  - Responsive: name always visible; type + size hidden on xs; date hidden on sm
+  - Same download/delete actions as FileCard
+- **`components/files/FileToolbar.tsx`** — Search, sort, and view-mode controls:
+  - Search by file name (live filter, clear button)
+  - Sort by Name / Size / Date (segmented button group)
+  - Sort direction toggle (asc ↕ desc) with descriptive `aria-label`
+  - Grid / List view toggle with `aria-pressed` states
+  - Live file count via `aria-live`
+- **`components/files/DeleteDialog.tsx`** — Accessible confirmation modal:
+  - Focuses cancel button on open (via `requestAnimationFrame` in useEffect — DOM side-effect only, no setState)
+  - Closes on Escape key (disabled while deleting)
+  - Backdrop click dismisses
+  - Inline error if deletion fails
+- **`app/(protected)/files/page.tsx`** — File Manager page at `/files`:
+  - Page header with file count + total size
+  - Refresh button with spinning icon while loading
+  - Collapsible upload zone (toggle button)
+  - Loading / Error / Empty / No-results states
+  - Grid view and List view
+  - Client-side search (by name) + sort (name/size/date, asc/desc)
+  - `DeleteDialog` keyed by file ID to reset state on each open
+
+#### Modified
+- **`types/index.ts`** — Added `SortField`, `SortOrder`, `ViewMode`, `UploadingFile` types
+
+#### Quality
+- **Build** — zero errors, zero TypeScript errors
+- **ESLint** — zero errors, zero warnings
+- **Security** — no new API surface; all file operations flow through existing hardened API routes
+
+---
+
 ## [0.3.0] — 2026-08-04
 
 ### Agent-03 — Supabase Storage Foundation
@@ -17,25 +83,20 @@ All notable changes to this project will be documented in this file.
 - **`app/api/files/route.ts`** — `GET /api/files` — list authenticated user's files
 - **`app/api/files/upload/route.ts`** — `POST /api/files/upload` — multipart file upload with validation and structured error codes (400/401/422/500)
 - **`app/api/files/[id]/route.ts`** — `GET /api/files/[id]` (signed download URL) and `DELETE /api/files/[id]` (delete file); returns 401/403/404/500 as appropriate
-- **`docs/storage-setup.md`** — Complete SQL guide for:
-  - `file_metadata` table with RLS (SELECT/INSERT/UPDATE/DELETE per-user policies)
-  - `personal-files` Storage bucket (private, 100 MB limit, explicit MIME type allowlist)
-  - Storage bucket RLS policies using `storage.foldername(name)[1] = auth.uid()::text`
-  - User isolation explanation (3 independent layers)
+- **`docs/storage-setup.md`** — Complete SQL guide for `file_metadata` table, Storage bucket, RLS policies
 - **`.env.example`** — Documents all required environment variables including the server-only `SUPABASE_SERVICE_ROLE_KEY`
 
 #### Modified
 - **`types/index.ts`** — Added `FileMetadataRow`, `UploadResult`, `FileListItem`, `FileValidationResult` interfaces
-- **`lib/constants.ts`** — Added `STORAGE_BUCKET`, strongly-typed `ALLOWED_MIME_TYPES` array, `SIGNED_URL_EXPIRY_SECONDS`; replaced loose `ACCEPTED_FILE_TYPES` string with derived value
-- **`lib/validation.ts`** — Added `isValidFileName`, `isAllowedMimeType`, `isAllowedFileSize`, `validateUploadedFile`; all file upload validation is centralised here
+- **`lib/constants.ts`** — Added `STORAGE_BUCKET`, strongly-typed `ALLOWED_MIME_TYPES` array, `SIGNED_URL_EXPIRY_SECONDS`
+- **`lib/validation.ts`** — Added `isValidFileName`, `isAllowedMimeType`, `isAllowedFileSize`, `validateUploadedFile`
 
 #### Security
 - Three-layer user isolation: storage path prefix `{userId}/…` + Storage RLS + `file_metadata` RLS
-- Application-level ownership double-check in `deleteFile` and `getSignedDownloadUrl` (defence-in-depth)
-- File name sanitisation prevents path traversal in storage paths
-- MIME type allowlist enforced at both validation layer and Storage bucket config
-- 100 MB file size cap enforced at validation layer and Storage bucket config
-- `SUPABASE_SERVICE_ROLE_KEY` documented as server-only, never prefixed with `NEXT_PUBLIC_`
+- Application-level ownership double-check in `deleteFile` and `getSignedDownloadUrl`
+- File name sanitisation prevents path traversal
+- MIME type allowlist enforced at validation layer and Storage bucket config
+- 100 MB file size cap at validation layer and Storage bucket config
 
 ---
 
@@ -44,17 +105,11 @@ All notable changes to this project will be documented in this file.
 ### Agent-02 — Security Audit & Hardening
 
 #### Fixed
-- **Open Redirect (CWE-601)** — `app/auth/login/page.tsx` was using the raw `redirectTo` query parameter directly with `router.push()`, allowing an attacker to craft a link like `/auth/login?redirectTo=https://evil.com` that redirects users to arbitrary external sites after login. Fixed by routing all redirects through the new `sanitizeRedirectPath()` helper which enforces relative-paths-only.
-
-- **Missing server-side input validation** — `app/auth/actions.ts` accepted form inputs and passed them to Supabase without any server-side checks. A malformed or excessively long input could cause unexpected errors or be used for enumeration. Fixed by adding explicit validation for email format, password length, display name length/character set, and avatar URL protocol (HTTPS only).
+- **Open Redirect (CWE-601)** — `sanitizeRedirectPath()` in `lib/validation.ts`
+- **Missing server-side input validation** — all Server Actions now validate inputs
 
 #### Added
-- **`lib/validation.ts`** — Shared, pure validation utilities used by Server Actions:
-  - `isValidEmail(email)` — RFC 5322 simplified format check
-  - `isValidPassword(password)` — minimum 8-character enforcement
-  - `isValidDisplayName(name)` — length cap (80 chars) and control-character rejection
-  - `isValidAvatarUrl(url)` — HTTPS-only URL enforcement
-  - `sanitizeRedirectPath(input, fallback)` — rejects external URLs, protocol-relative URLs (`//`), and encoded-slash bypass attempts (`/%2F`)
+- **`lib/validation.ts`** — `isValidEmail`, `isValidPassword`, `isValidDisplayName`, `isValidAvatarUrl`, `sanitizeRedirectPath`
 
 ---
 
@@ -63,27 +118,8 @@ All notable changes to this project will be documented in this file.
 ### Agent-02 — Authentication & User System
 
 #### Added
-- `proxy.ts` — Next.js 16 proxy with session refresh + protected route guards
-- `app/auth/actions.ts` — Server Actions: `signUp`, `signIn`, `signOut`, `updateProfile`
-- `app/auth/layout.tsx` — Centered card layout for auth pages
-- `app/auth/login/page.tsx` — Email/Password login
-- `app/auth/signup/page.tsx` — Email/Password sign-up with password confirmation
-- `app/auth/callback/route.ts` — OAuth/email confirmation callback handler
-- `app/(protected)/layout.tsx` — Server-side auth guard (2nd layer protection)
-- `app/(protected)/dashboard/page.tsx` — Protected dashboard page
-- `app/(protected)/profile/page.tsx` — Protected profile page
-- `components/auth/SignOutButton.tsx` — Client sign-out button
-- `components/profile/ProfileForm.tsx` — Client profile edit form
-- `hooks/useAuth.ts` — Client-side auth state hook
-- `services/auth.service.ts` — `getProfile()`, `ensureProfile()` server helpers
-- `docs/supabase-setup.md` — SQL migration: `profiles` table, RLS policies, trigger
-
-#### Modified
-- `components/layout/Header.tsx` — Auth-aware UI
-- `components/layout/Sidebar.tsx` — Active-state navigation
-- `app/page.tsx` — Server Component, auth-aware CTA
-- `types/index.ts` — Added `ProfileRow`
-- `lib/constants.ts` — Added `AUTH_ROUTES`, `PROTECTED_ROUTES`
+- `proxy.ts`, auth pages/actions, protected route group, Dashboard, Profile
+- `useAuth` hook, `auth.service.ts`
 
 ---
 
