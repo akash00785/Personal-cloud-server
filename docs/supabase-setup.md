@@ -27,10 +27,12 @@ CREATE POLICY "Users can view own profile"
   USING (auth.uid() = id);
 
 -- Policy: Users can update their own profile
+-- WITH CHECK ensures the id field cannot be changed to another user's id during update
 CREATE POLICY "Users can update own profile"
   ON public.profiles
   FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (auth.uid() = id);
 
 -- Policy: Users can insert their own profile
 CREATE POLICY "Users can insert own profile"
