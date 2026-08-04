@@ -1,25 +1,28 @@
 # TODO
 
-## 🔴 Critical (Before Agent-03 starts)
+## 🔴 Critical (Before using Storage API)
 
-- [ ] **Run Supabase SQL migration** — Open `docs/supabase-setup.md` and execute the SQL in Supabase Dashboard → SQL Editor. This creates the `profiles` table, Row Level Security policies, and the `handle_new_user` trigger.
+- [ ] **Run Supabase SQL migration** — Execute SQL in `docs/supabase-setup.md` first (profiles table + RLS + trigger).
+- [ ] **Run Storage SQL migration** — Execute SQL in `docs/storage-setup.md` (file_metadata table + RLS + Storage bucket + Storage bucket RLS).
 - [ ] **Configure Supabase Auth settings** — Set Site URL and Redirect URLs in Dashboard → Authentication → URL Configuration.
 
 ---
 
-## 🟡 Agent-03: File Management
+## 🟡 Agent-04: File Manager UI
 
-- [ ] Create file manager page (`/files`)
-- [ ] Implement file upload API route (`/api/files/upload`)
-- [ ] Implement file download API route (`/api/files/[id]/download`)
-- [ ] Implement file delete API route
-- [ ] List files from Supabase Storage
-- [ ] Create Supabase Storage bucket (`personal-files`) with RLS
-- [ ] Display file list with name, size, type, date
+- [ ] Create file manager page (`/files`) inside `app/(protected)/files/page.tsx`
+- [ ] Build file list component — shows name, size, type, upload date
+- [ ] Build file upload component — drag-and-drop or button; calls `POST /api/files/upload`
+- [ ] Build file download button — calls `GET /api/files/[id]` → signed URL, triggers browser download
+- [ ] Build file delete button — calls `DELETE /api/files/[id]` with confirmation dialog
+- [ ] Handle empty state (no files yet)
+- [ ] Show upload progress indicator
+
+> The backend API is complete — all endpoints are in `app/api/files/`. The UI only needs to call them.
 
 ---
 
-## 🟡 Agent-04+: Additional Features
+## 🟡 Agent-05+: Additional Features
 
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader (URL → cloud)
@@ -28,6 +31,7 @@
 - [ ] Create Settings page (`/settings`)
 - [ ] Configure Render deployment (`render.yaml`)
 - [ ] Add testing setup (Jest / Vitest + Testing Library)
+- [ ] Add rate limiting on upload and auth routes
 
 ---
 
@@ -49,3 +53,14 @@
 - [x] User profile create/read/update
 - [x] Profile page UI
 - [x] Auth-aware Header and Home page
+- [x] Open redirect fix + server-side input validation
+- [x] Supabase Storage bucket configuration (docs/storage-setup.md)
+- [x] Storage RLS policies (user isolation via path prefix + DB RLS)
+- [x] `file_metadata` table with RLS
+- [x] `services/storage.service.ts` — upload, list, signed URL, delete
+- [x] `GET /api/files` — list user's files
+- [x] `POST /api/files/upload` — upload file
+- [x] `GET /api/files/[id]` — signed download URL
+- [x] `DELETE /api/files/[id]` — delete file
+- [x] File validation (name, MIME type, size) in `lib/validation.ts`
+- [x] `.env.example` with all storage env vars

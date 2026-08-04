@@ -1,8 +1,8 @@
 # Project Status
 
 **Last Updated:** 2026-08-04
-**Agent:** Agent-02 (Security Audit)
-**Phase:** Authentication & User System — Security Hardened
+**Agent:** Agent-03 (Supabase Storage Foundation)
+**Phase:** Storage Backend — File Upload / Download / Delete / User Isolation
 
 ---
 
@@ -50,7 +50,7 @@
 - [x] **Verified no XSS risk** — no `dangerouslySetInnerHTML`, React escapes all output by default
 - [x] **Verified CSRF protection** — Next.js 16 Server Actions validate `Origin` header automatically
 - [x] **Verified SQL Injection immunity** — Supabase uses PostgREST parameterized queries; no raw SQL in app code
-- [x] **Verified cookie security** — `@supabase/ssr` sets `sameSite: 'lax'` (CSRF safe); `httpOnly: false` is intentional by Supabase (client JS must read tokens to sync state)
+- [x] **Verified cookie security** — `@supabase/ssr` sets `sameSite: 'lax'` (CSRF safe)
 - [x] **Verified double auth guard** — proxy.ts + `(protected)/layout.tsx` both independently check auth
 - [x] **npm audit** — 0 known vulnerabilities in dependencies
 - [x] **Build** — zero errors, zero warnings
@@ -58,17 +58,33 @@
 
 ---
 
-## 🔲 Remaining Tasks (for Agent-03+)
+## ✅ Completed Tasks (Agent-03 — Supabase Storage Foundation)
 
-- [ ] **⚠️ Run Supabase SQL migration** (see `docs/supabase-setup.md`) — profiles table + RLS + trigger
-- [ ] Create file manager page (`/files`)
-- [ ] Implement file upload / download API routes
+- [x] **Expanded `types/index.ts`** — Added `FileMetadataRow`, `UploadResult`, `FileListItem`, `FileValidationResult` types
+- [x] **Updated `lib/constants.ts`** — Added `STORAGE_BUCKET`, `ALLOWED_MIME_TYPES`, `SIGNED_URL_EXPIRY_SECONDS`; replaced loose `ACCEPTED_FILE_TYPES` with strongly-typed const
+- [x] **Expanded `lib/validation.ts`** — Added `isValidFileName`, `isAllowedMimeType`, `isAllowedFileSize`, `validateUploadedFile` with full input checks
+- [x] **Created `services/storage.service.ts`** — `uploadFile`, `listUserFiles`, `getSignedDownloadUrl`, `deleteFile`; user isolation via `{userId}/{uuid}-{filename}` path + ownership checks
+- [x] **Created `app/api/files/route.ts`** — `GET` handler lists authenticated user's files
+- [x] **Created `app/api/files/upload/route.ts`** — `POST` handler accepts multipart upload, validates, delegates to storage service
+- [x] **Created `app/api/files/[id]/route.ts`** — `GET` returns signed download URL; `DELETE` removes file + metadata
+- [x] **Created `docs/storage-setup.md`** — Full SQL for `file_metadata` table + RLS, Storage bucket creation, Storage bucket RLS; user-isolation explanation
+- [x] **Created `.env.example`** — Documents all required env vars including `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+- [x] **Build** — zero errors, zero warnings
+- [x] **ESLint** — zero errors, zero warnings
+- [x] **TypeScript** — zero errors
+
+---
+
+## 🔲 Remaining Tasks (for Agent-04+)
+
+- [ ] **⚠️ Run Supabase SQL migration** — Execute SQL in `docs/supabase-setup.md` AND `docs/storage-setup.md` before any file operations work
+- [ ] Create file manager page (`/files`) — UI only, backend API is ready
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader feature
 - [ ] Implement media streaming
 - [ ] Implement search functionality
 - [ ] Create Settings page (`/settings`)
-- [ ] **Future: Add rate limiting** on sign-in/sign-up routes (Supabase has built-in limits, app-level not yet added)
+- [ ] **Future: Add rate limiting** on sign-in/sign-up and upload routes
 - [ ] Configure Render deployment (render.yaml)
 - [ ] Add testing setup (Jest / Vitest + Testing Library)
 
@@ -87,6 +103,8 @@
 | `clsx` | ^2 | Conditional classnames |
 | `tailwind-merge` | ^3 | Tailwind class merging |
 
+> No new packages were added by Agent-03 — all storage operations use the already-installed `@supabase/supabase-js` client.
+
 ---
 
 ## 📁 Folder Structure
@@ -95,15 +113,22 @@
 Personal-cloud-server/
 ├── app/
 │   ├── (protected)/
-│   │   ├── layout.tsx          # Server-side auth guard (2nd layer)
+│   │   ├── layout.tsx
 │   │   ├── dashboard/page.tsx
 │   │   └── profile/page.tsx
+│   ├── api/
+│   │   └── files/
+│   │       ├── route.ts          # GET  /api/files       — list files
+│   │       ├── upload/
+│   │       │   └── route.ts      # POST /api/files/upload — upload file
+│   │       └── [id]/
+│   │           └── route.ts      # GET/DELETE /api/files/[id]
 │   ├── auth/
 │   │   ├── layout.tsx
-│   │   ├── login/page.tsx      # Uses sanitizeRedirectPath (open redirect fix)
+│   │   ├── login/page.tsx
 │   │   ├── signup/page.tsx
 │   │   ├── callback/route.ts
-│   │   └── actions.ts          # Server-side validated signIn/signUp/signOut/updateProfile
+│   │   └── actions.ts
 │   ├── globals.css
 │   ├── layout.tsx
 │   ├── page.tsx
@@ -113,8 +138,8 @@ Personal-cloud-server/
 ├── components/
 │   ├── auth/SignOutButton.tsx
 │   ├── profile/ProfileForm.tsx
-│   ├── ui/                     # Button, Input, Card, Badge, Spinner
-│   └── layout/                 # Header, Footer, Sidebar, PageWrapper
+│   ├── ui/
+│   └── layout/
 ├── hooks/
 │   ├── useAuth.ts
 │   ├── useLocalStorage.ts
@@ -122,26 +147,29 @@ Personal-cloud-server/
 │   └── useMediaQuery.ts
 ├── lib/
 │   ├── supabase/               # client.ts, server.ts, middleware.ts
-│   ├── validation.ts           # isValidEmail, isValidPassword, sanitizeRedirectPath…
+│   ├── validation.ts           # file + auth validation helpers
 │   ├── utils.ts
-│   └── constants.ts
+│   └── constants.ts            # STORAGE_BUCKET, ALLOWED_MIME_TYPES, MAX_UPLOAD_SIZE_*
 ├── services/
 │   ├── auth.service.ts
+│   ├── storage.service.ts      # uploadFile, listUserFiles, getSignedDownloadUrl, deleteFile
 │   └── supabase.service.ts
-├── types/index.ts
+├── types/index.ts               # FileMetadataRow, UploadResult, FileListItem, …
 ├── docs/
 │   ├── architecture.md
-│   └── supabase-setup.md
-├── proxy.ts                    # Session refresh + protected route guard (1st layer)
+│   ├── supabase-setup.md       # profiles table + RLS + trigger
+│   └── storage-setup.md        # file_metadata table + RLS + Storage bucket + Storage RLS
+├── proxy.ts
 └── .env.example
 ```
 
 ---
 
-## 📝 Notes for Agent-03
+## 📝 Notes for Agent-04
 
-1. **Run Supabase SQL migration first** — `docs/supabase-setup.md`
-2. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
-3. **Server Actions** for new features go in `app/<feature>/actions.ts`; always call `supabase.auth.getUser()` first for authorization
-4. **`lib/validation.ts`** — use these helpers for any new input validation
+1. **Run BOTH SQL migrations** — `docs/supabase-setup.md` (profiles) and `docs/storage-setup.md` (file_metadata + storage bucket) must be executed in Supabase Dashboard before files work
+2. **Backend API is complete** — `/api/files` (list), `/api/files/upload` (POST), `/api/files/[id]` (GET signed URL / DELETE) are ready
+3. **Three-layer user isolation** — Storage path prefix, Storage RLS, file_metadata RLS all independently enforce per-user access
+4. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
 5. **Dark theme, `cn()`, `@/` alias** — always follow PROJECT_RULES.md
+6. **Validation** — `lib/validation.ts` has `validateUploadedFile()` for filename, MIME type, and size checks
