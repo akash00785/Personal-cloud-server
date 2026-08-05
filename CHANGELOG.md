@@ -4,6 +4,58 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.7.0] — 2026-08-05
+
+### Agent-07 — Secure File Sharing System
+
+#### Added
+- **`types/index.ts`** — New types: `ShareExpiry`, `ShareStatus`, `ShareLinkRow`, `ShareLinkItem`, `ResolvedShare`
+- **`lib/constants.ts`** — New constants: `SHARE_BASE_PATH`, `SHARE_EXPIRY_MS`, `SHARE_EXPIRY_LABELS`, `SHARE_EXPIRY_OPTIONS`, `SHARE_DOWNLOAD_URL_EXPIRY_SECONDS`
+- **`lib/supabase/admin.ts`** — Admin Supabase client (service role key); bypasses RLS; server-only
+- **`services/share.service.ts`** — Full share link business logic:
+  - `createShareLink(fileId, expiry)` — validates file ownership, generates UUID token, stores row
+  - `listShareLinks(fileId)` — lists all share links for a file owned by the current user
+  - `revokeShareLink(shareId)` — sets `revoked_at` timestamp (ownership verified)
+  - `resolveShareToken(token)` — public: admin client lookup + validity check + signed URL generation
+- **`app/api/files/[id]/share/route.ts`** — `POST` create share + `GET` list shares (authenticated)
+- **`app/api/files/[id]/share/[shareId]/route.ts`** — `DELETE` revoke share (authenticated)
+- **`app/api/share/[token]/route.ts`** — `GET` public resolve endpoint (no auth required)
+- **`hooks/useFileSharing.ts`** — Client hook: `fetchLinks`, `createLink`, `revokeLink`; all setState in Promise callbacks
+- **`components/files/ShareDialog.tsx`** — Full share management dialog:
+  - Expiry picker: 1 Hour / 24 Hours / 7 Days / Never
+  - Generate Link button
+  - Existing links list with status badges (Active / Expired / Revoked)
+  - Copy Link button (clipboard API with fallback)
+  - Revoke button for active links
+  - Keyboard: Escape to close, focus management on open
+- **`app/share/[token]/page.tsx`** — Public share page:
+  - No login required
+  - Shows file name, type, size, expiry info
+  - Download button (signed URL valid 1 hour)
+  - Error page for invalid/expired/revoked tokens
+  - SEO metadata (generateMetadata)
+- **`docs/share-setup.md`** — SQL migration guide + API reference + security notes
+
+#### Changed
+- **`components/files/FileCard.tsx`** — Added `onShare` prop; Share button (link icon) in hover action group
+- **`components/files/FileRow.tsx`** — Added `onShare` prop; Share button in action group
+- **`components/files/PreviewDialog.tsx`** — Added `onShare` prop; Share button in footer alongside Download
+- **`app/(protected)/files/page.tsx`** — Added `pendingShareFile` state, `handleShareOpen`/`handleShareClose` callbacks, `<ShareDialog>` wired up; imported `ShareDialog`
+
+#### Security
+- Share token is a random UUID (128-bit entropy) — unguessable
+- Expiry enforced server-side at resolution time
+- Revocation is immediate — `revoked_at` timestamp checked before serving
+- Admin client (service role) used only in server route handlers — never exposed to browser
+- `SUPABASE_SERVICE_ROLE_KEY` is server-only (no `NEXT_PUBLIC_` prefix)
+- Public share page is intentionally read-only: no edit, delete, or auth actions
+- File/folder system, existing auth, existing APIs — all unchanged
+
+#### Quality
+- `npm audit`: 0 vulnerabilities | Build: ✓ | ESLint: ✓ (0 errors) | TypeScript: ✓ (0 errors)
+
+---
+
 ## [0.6.0] — 2026-08-04
 
 ### Agent-06 — File Preview System

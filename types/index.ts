@@ -140,6 +140,48 @@ export interface BreadcrumbItem {
   name: string;
 }
 
+// ---------- File Sharing ----------
+
+/** Expiry duration options for share links */
+export type ShareExpiry = '1h' | '24h' | '7d' | 'never';
+
+/** Status of a share link */
+export type ShareStatus = 'active' | 'expired' | 'revoked';
+
+/** Shape of a row in the `file_shares` table */
+export interface ShareLinkRow {
+  id: string;
+  file_id: string;
+  owner_id: string;
+  token: string;
+  expires_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
+/** Resolved data for a public share token */
+export interface ResolvedShare {
+  shareId: string;
+  fileId: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  signedUrl: string;
+  expiresAt: string | null;
+}
+
+/** Application-level share link object (camelCase) */
+export interface ShareLinkItem {
+  id: string;
+  fileId: string;
+  token: string;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  createdAt: string;
+  status: ShareStatus;
+  shareUrl: string;
+}
+
 // ---------- Navigation ----------
 export interface NavItem {
   label: string;

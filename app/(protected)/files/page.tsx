@@ -13,6 +13,7 @@ import { FileCard } from '@/components/files/FileCard';
 import { FileRow } from '@/components/files/FileRow';
 import { DeleteDialog } from '@/components/files/DeleteDialog';
 import { PreviewDialog } from '@/components/files/PreviewDialog';
+import { ShareDialog } from '@/components/files/ShareDialog';
 import { Breadcrumb } from '@/components/folders/Breadcrumb';
 import { FolderCard } from '@/components/folders/FolderCard';
 import { FolderRow } from '@/components/folders/FolderRow';
@@ -70,6 +71,9 @@ function FilesPageContent(): React.JSX.Element {
 
   // File preview dialog
   const [pendingPreviewFile, setPendingPreviewFile] = useState<FileListItem | null>(null);
+
+  // File share dialog
+  const [pendingShareFile, setPendingShareFile] = useState<FileListItem | null>(null);
 
   // Folder dialogs
   const [showCreateFolder, setShowCreateFolder] = useState<boolean>(false);
@@ -149,6 +153,16 @@ function FilesPageContent(): React.JSX.Element {
 
   const handlePreviewClose = useCallback((): void => {
     setPendingPreviewFile(null);
+  }, []);
+
+  const handleShareOpen = useCallback((file: FileListItem): void => {
+    // Close preview if open, then open share dialog
+    setPendingPreviewFile(null);
+    setPendingShareFile(file);
+  }, []);
+
+  const handleShareClose = useCallback((): void => {
+    setPendingShareFile(null);
   }, []);
 
   // ── Folder handlers ───────────────────────────────────────────────────────────
@@ -385,6 +399,7 @@ function FilesPageContent(): React.JSX.Element {
                   onDownload={downloadFile}
                   onDelete={(f) => setPendingDeleteFile(f)}
                   onPreview={handlePreviewOpen}
+                  onShare={handleShareOpen}
                 />
               </div>
             ))}
@@ -432,6 +447,7 @@ function FilesPageContent(): React.JSX.Element {
                     onDownload={downloadFile}
                     onDelete={(f) => setPendingDeleteFile(f)}
                     onPreview={handlePreviewOpen}
+                    onShare={handleShareOpen}
                   />
                 </li>
               ))}
@@ -449,6 +465,15 @@ function FilesPageContent(): React.JSX.Element {
         file={pendingPreviewFile}
         onClose={handlePreviewClose}
         onDownload={downloadFile}
+        onShare={handleShareOpen}
+      />
+
+      {/* File share */}
+      <ShareDialog
+        key={pendingShareFile?.id ?? 'no-share'}
+        isOpen={pendingShareFile !== null}
+        file={pendingShareFile}
+        onClose={handleShareClose}
       />
 
       {/* File delete confirmation */}

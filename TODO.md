@@ -9,7 +9,14 @@
 
 ---
 
-## 🟡 Agent-07+: Additional Features
+## 🔴 Critical (Before using File Sharing)
+
+- [ ] **Run Share SQL migration** — Execute SQL in `docs/share-setup.md` (file_shares table + RLS).
+- [ ] **Add `SUPABASE_SERVICE_ROLE_KEY`** to `.env.local` — required for public share token resolution.
+
+---
+
+## 🟡 Agent-08+: Additional Features
 
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader (URL → cloud)
@@ -77,3 +84,11 @@
 - [x] **File Preview System — File Info Panel** (name, type, MIME, size, upload date)
 - [x] **File Preview System — Download Button** in preview dialog
 - [x] **File Preview System — Responsive** (mobile bottom sheet, tablet/desktop modal)
+- [x] **Secure File Sharing — Share Button** (FileCard, FileRow, PreviewDialog)
+- [x] **Secure File Sharing — Generate Link** (`POST /api/files/:id/share`, UUID token, `services/share.service.ts`)
+- [x] **Secure File Sharing — Expiry Support** (1 Hour / 24 Hours / 7 Days / Never)
+- [x] **Secure File Sharing — Copy Link Button** (`ShareDialog`, clipboard API with fallback)
+- [x] **Secure File Sharing — Revoke Link** (`DELETE /api/files/:id/share/:shareId`, revoked_at timestamp)
+- [x] **Secure File Sharing — Status Badges** (Active / Expired / Revoked in `ShareDialog`)
+- [x] **Secure File Sharing — Public Share Page** (`/share/[token]`, no login, download only, error states)
+- [x] **Secure File Sharing — SQL Migration** (`docs/share-setup.md`, `file_shares` table + RLS)

@@ -168,7 +168,35 @@ docs/
 
 ---
 
-## 📝 Notes for Agent-07
+## ✅ Completed Tasks (Agent-07 — Secure File Sharing System)
+
+- [x] **`types/index.ts`** — Added `ShareExpiry`, `ShareStatus`, `ShareLinkRow`, `ShareLinkItem`, `ResolvedShare` types
+- [x] **`lib/constants.ts`** — Added `SHARE_BASE_PATH`, `SHARE_EXPIRY_MS`, `SHARE_EXPIRY_LABELS`, `SHARE_EXPIRY_OPTIONS`, `SHARE_DOWNLOAD_URL_EXPIRY_SECONDS`
+- [x] **`lib/supabase/admin.ts`** — Admin Supabase client using service role key (server-only)
+- [x] **`services/share.service.ts`** — `createShareLink`, `listShareLinks`, `revokeShareLink`, `resolveShareToken`
+- [x] **`app/api/files/[id]/share/route.ts`** — `POST` create share, `GET` list shares (authenticated)
+- [x] **`app/api/files/[id]/share/[shareId]/route.ts`** — `DELETE` revoke share (authenticated)
+- [x] **`app/api/share/[token]/route.ts`** — `GET` public resolve (no auth required)
+- [x] **`hooks/useFileSharing.ts`** — Client hook for share CRUD
+- [x] **`components/files/ShareDialog.tsx`** — Full share management dialog (generate, copy, revoke, status badges)
+- [x] **`app/share/[token]/page.tsx`** — Public share page (no login, download only, error states)
+- [x] **`components/files/FileCard.tsx`** — Added `onShare` prop + Share button
+- [x] **`components/files/FileRow.tsx`** — Added `onShare` prop + Share button
+- [x] **`components/files/PreviewDialog.tsx`** — Added `onShare` prop + Share button in footer
+- [x] **`app/(protected)/files/page.tsx`** — ShareDialog integrated, handleShareOpen/Close wired
+- [x] **`docs/share-setup.md`** — SQL migration guide for `file_shares` table + RLS + API reference
+- [x] **Build** — zero errors | **ESLint** — zero errors | **TypeScript** — zero errors | **npm audit** — 0 vulnerabilities
+
+---
+
+## 📝 Notes for Agent-08
+
+1. **Run SQL migration** — `docs/share-setup.md` must be executed in Supabase Dashboard before the sharing feature works
+2. **Add `SUPABASE_SERVICE_ROLE_KEY`** to `.env.local` — required for the public share endpoint (`GET /api/share/[token]`)
+3. **Share token** is a random UUID in the URL: `/share/<uuid>` — the token is the only credential for public access
+4. **Public share page** is at `/share/[token]` — no auth required, intentionally read-only (view + download only)
+5. **Share status** is computed from `expires_at` and `revoked_at` — check `services/share.service.ts` for logic
+6. **All existing systems unchanged** — Folder, Auth, Upload, Preview, existing APIs are untouched
 
 1. **Run SQL migration** — `docs/folder-setup.md` must be executed in Supabase Dashboard before folders work
 2. **Folder API is complete** — `/api/folders` (list/create), `/api/folders/:id` (rename/delete), `/api/folders/:id/path` (breadcrumb)
