@@ -187,10 +187,64 @@
 
 ---
 
-## 📝 Notes for Next Agent
+---
 
-1. **SQL migrations still required** — Run `docs/supabase-setup.md`, `docs/storage-setup.md`, `docs/folder-setup.md`, `docs/share-setup.md` in Supabase Dashboard before live use.
-2. **`SUPABASE_SERVICE_ROLE_KEY`** must be added to `.env.local` for the public share endpoint.
-3. **Design system** — All CSS tokens live in `app/globals.css`. Use `var(--glass-*)`, `var(--accent-*)`, etc. Do not add new colors outside this system.
-4. **Tailwind v4** — Do not use v3 plugin config syntax. All custom utilities are in `globals.css`.
-5. **Animations** — Use `.animate-scale-in`, `.animate-fade-in-up`, `.animate-slide-up` utility classes from `globals.css` for dialog/card enter animations.
+## ✅ Completed Tasks (Agent-09 — Full Audit & Bug Fixes)
+
+**Date:** 2026-08-05
+
+### Root Cause Analysis (Original Issues)
+Previous agents documented SQL migrations as "required" but never verified execution.
+The file manager appeared broken because:
+1. **SQL migrations not run** — `file_metadata`, `folders`, `file_shares` tables and all RLS
+   policies were defined in docs but not verified as applied in the live Supabase project.
+2. **`useFileUpload` folderId bug** — Files always uploaded to root (`folder_id = NULL`)
+   regardless of the currently-viewed folder, because `folderId` was never appended to
+   the FormData sent to `POST /api/files/upload`.
+3. **`proxy.ts` (middleware)** — Confirmed working: Next.js 16 uses `proxy.ts` as the
+   middleware entry point (equivalent to `middleware.ts` in older versions). The middleware
+   runs session refresh and route-protection redirects correctly.
+
+### Fixes Applied
+- [x] **`hooks/useFileUpload.ts`** — Added `folderId: string | null` parameter; now appends
+      `folderId` to FormData so files land in the correct folder on upload.
+- [x] **`app/(protected)/files/page.tsx`** — Passes `currentFolderId` to `useFileUpload`
+      so the hook always uploads into the folder the user is currently viewing.
+- [x] **`docs/supabase-migration-complete.sql`** — New consolidated, idempotent SQL
+      migration combining all four previous migration docs into one file. Includes:
+      `profiles`, `file_metadata`, `folders`, `file_shares` tables; all 15 RLS policies;
+      4 `GRANT` statements for the `authenticated` role; storage bucket creation;
+      4 storage RLS policies on `storage.objects`.
+
+### Quality
+- [x] **`npm run build`** — ✓ zero errors, zero warnings
+- [x] **`npm run lint`** — ✓ zero errors, zero warnings
+- [x] **`npx tsc --noEmit`** — ✓ zero TypeScript errors
+- [x] **`npm audit`** — 0 known vulnerabilities
+
+---
+
+## 📝 Notes for Next Agent / Operator
+
+### ⚠️ Action Required Before the File Manager Works
+
+**Run the SQL migration in Supabase Dashboard:**
+1. Open **Supabase Dashboard → SQL Editor → New query**
+2. Paste the entire contents of **`docs/supabase-migration-complete.sql`**
+3. Click **Run**
+
+This creates all tables, RLS policies, GRANTs, the storage bucket, and storage policies
+in one idempotent script. Safe to re-run.
+
+**Add `SUPABASE_SERVICE_ROLE_KEY` to Render environment variables:**
+- Find it at **Supabase Dashboard → Project Settings → API → service_role (secret)**
+- Add it to **Render → Environment → Add Environment Variable**
+- Required for the public share endpoint (`GET /api/share/[token]`)
+
+### Design System Notes
+- All CSS tokens live in `app/globals.css`. Use `var(--glass-*)`, `var(--accent-*)`, etc.
+- Do not add new colors outside this system.
+- **Tailwind v4** — Do not use v3 plugin config syntax. All custom utilities are in `globals.css`.
+- **Animations** — Use `.animate-scale-in`, `.animate-fade-in-up`, `.animate-slide-up` utility classes.
+- **`proxy.ts`** is the Next.js 16 middleware file — do NOT rename it to `middleware.ts`
+  (Next.js 16 uses `proxy.ts` as the middleware entry point).

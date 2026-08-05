@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.9.0] — 2026-08-05
+
+### Agent-09 — Full Audit & Bug Fixes
+
+#### Root Cause Analysis
+- **Missing SQL migrations** — all four migration docs existed but were never verified as
+  applied in Supabase. `docs/supabase-migration-complete.sql` now consolidates everything.
+- **`useFileUpload` folderId bug** — files always uploaded to root because `folderId` was
+  never passed in the XHR FormData, regardless of the currently-viewed folder.
+- **`proxy.ts` middleware** — confirmed working; Next.js 16 uses `proxy.ts` as the
+  middleware entry point (not `middleware.ts`). No change needed.
+
+#### Fixed
+- **`hooks/useFileUpload.ts`** — Added `folderId: string | null` parameter (default `null`).
+  `uploadWithProgress()` now appends `folderId` to the FormData when non-null, so
+  uploaded files land in the correct folder instead of always going to root.
+- **`app/(protected)/files/page.tsx`** — `useFileUpload(fetchFiles)` → `useFileUpload(fetchFiles, currentFolderId)`.
+  The current folder UUID is now passed through, fixing in-folder uploads end-to-end.
+
+#### Added
+- **`docs/supabase-migration-complete.sql`** — Single consolidated, fully idempotent
+  SQL script replacing the four individual migration docs. Covers:
+  - `profiles` table + trigger + 3 RLS policies
+  - `set_updated_at()` shared trigger function
+  - `file_metadata` table + indexes + triggers + 4 RLS policies + `GRANT`
+  - `folders` table + indexes + triggers + 4 RLS policies + `GRANT`
+  - `folder_id` column on `file_metadata` (with FK `ON DELETE SET NULL`) + index
+  - `file_shares` table + indexes + 4 RLS policies + `GRANT`
+  - Storage bucket `personal-files` creation (idempotent `ON CONFLICT DO NOTHING`)
+  - 4 storage RLS policies on `storage.objects` for `personal-files`
+
+#### Quality
+- `npm run build`: ✓ zero errors | `npm run lint`: ✓ zero errors
+- `npx tsc --noEmit`: ✓ zero errors | `npm audit`: 0 vulnerabilities
+
+---
+
 ## [0.8.0] — 2026-08-05
 
 ### Agent-08 — UI/UX Polish — Unified Design System

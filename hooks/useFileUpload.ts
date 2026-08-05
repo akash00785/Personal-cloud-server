@@ -9,12 +9,18 @@ function generateId(): string {
 
 function uploadWithProgress(
   file: File,
+  folderId: string | null,
   onProgress: (progress: number) => void
 ): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const form = new FormData();
     form.append('file', file);
+
+    // Include folderId so the file lands in the current folder, not root
+    if (folderId !== null) {
+      form.append('folderId', folderId);
+    }
 
     xhr.upload.addEventListener('progress', (e: ProgressEvent) => {
       if (e.lengthComputable) {
@@ -55,7 +61,18 @@ export interface UseFileUploadReturn {
   hasActive: boolean;
 }
 
-export function useFileUpload(onComplete: () => void): UseFileUploadReturn {
+/**
+ * Hook for managing multi-file uploads with per-file progress tracking.
+ *
+ * @param onComplete - Called after at least one file uploads successfully.
+ * @param folderId   - UUID of the destination folder, or null for root.
+ *                     Must match the currently-viewed folder so files appear
+ *                     in the right place immediately after upload.
+ */
+export function useFileUpload(
+  onComplete: () => void,
+  folderId: string | null = null
+): UseFileUploadReturn {
   const [queue, setQueue] = useState<UploadingFile[]>([]);
 
   const upload = useCallback(
@@ -85,7 +102,7 @@ export function useFileUpload(onComplete: () => void): UseFileUploadReturn {
         update(itemId, { status: 'uploading' });
 
         try {
-          await uploadWithProgress(file, (progress) => {
+          await uploadWithProgress(file, folderId, (progress) => {
             update(itemId, { progress });
           });
           update(itemId, { status: 'done', progress: 100 });
@@ -107,7 +124,7 @@ export function useFileUpload(onComplete: () => void): UseFileUploadReturn {
         setQueue((prev) => prev.filter((item) => item.status !== 'done'));
       }, 3000);
     },
-    [onComplete]
+    [onComplete, folderId]
   );
 
   const clearQueue = useCallback((): void => {

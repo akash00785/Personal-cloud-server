@@ -96,7 +96,7 @@ function FilesPageContent(): React.JSX.Element {
     removeFolder,
   } = useFolders(currentFolderId);
 
-  const { queue, upload, clearQueue, hasActive } = useFileUpload(fetchFiles);
+  const { queue, upload, clearQueue, hasActive } = useFileUpload(fetchFiles, currentFolderId);
 
   // ── Derived data ─────────────────────────────────────────────────────────────
   const filteredAndSortedFiles = useMemo<FileListItem[]>(() => {
