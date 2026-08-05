@@ -19,18 +19,11 @@ export function RenameFolderDialog({
   onConfirm,
   onCancel,
 }: RenameFolderDialogProps): React.JSX.Element | null {
-  // Initialise name directly from the folder prop so there is no need
-  // to call setState inside a useEffect body (avoids set-state-in-effect).
-  // The parent re-keys this component on every new folder selection, so
-  // state resets automatically on each open.
   const [name, setName] = useState<string>(folder?.name ?? '');
   const [isRenaming, setIsRenaming] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Focus and select text when the dialog opens.
-  // Only a DOM side-effect — no setState — which is exactly what effects
-  // are intended for.
   useEffect(() => {
     if (isOpen) {
       requestAnimationFrame(() => {
@@ -40,7 +33,6 @@ export function RenameFolderDialog({
     }
   }, [isOpen]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent): void => {
@@ -75,7 +67,8 @@ export function RenameFolderDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="rename-folder-title"
@@ -85,18 +78,21 @@ export function RenameFolderDialog({
     >
       <div
         className={cn(
-          'w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl',
-          'animate-in fade-in zoom-in-95 duration-150'
+          'w-full max-w-sm animate-scale-in',
+          'rounded-2xl border border-zinc-800/60 bg-zinc-900',
+          'shadow-2xl shadow-black/50',
+          'ring-1 ring-inset ring-white/[0.04]',
+          'p-6'
         )}
       >
         {/* Icon */}
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-zinc-700/40 bg-zinc-800/60">
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="h-6 w-6 text-zinc-300"
+            className="h-7 w-7 text-zinc-300"
             aria-hidden="true"
           >
             <path d="M12 20h9" />
@@ -111,8 +107,11 @@ export function RenameFolderDialog({
         >
           Rename folder
         </h2>
+        <p className="mt-1 text-center text-sm text-zinc-500">
+          Enter a new name for &ldquo;{folder.name}&rdquo;
+        </p>
 
-        <form onSubmit={(e) => void handleSubmit(e)} className="mt-4 flex flex-col gap-3">
+        <form onSubmit={(e) => void handleSubmit(e)} className="mt-5 flex flex-col gap-3">
           <Input
             ref={inputRef}
             type="text"
@@ -125,12 +124,20 @@ export function RenameFolderDialog({
           />
 
           {error && (
-            <p role="alert" className="rounded-lg bg-red-900/20 px-3 py-2 text-sm text-red-400">
+            <div
+              role="alert"
+              className="flex items-center gap-2 rounded-xl border border-red-900/40 bg-red-950/40 px-3 py-2 text-sm text-red-400"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {error}
-            </p>
+            </div>
           )}
 
-          <div className="flex gap-3 pt-1">
+          <div className="flex gap-2.5 pt-1">
             <Button
               type="button"
               variant="secondary"

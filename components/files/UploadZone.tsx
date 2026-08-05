@@ -60,7 +60,6 @@ export function UploadZone({ onFiles, disabled = false }: UploadZoneProps): Reac
   const onInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>): void => {
       handleFiles(e.target.files);
-      // Reset input so the same file can be re-selected
       e.target.value = '';
     },
     [handleFiles]
@@ -93,18 +92,21 @@ export function UploadZone({ onFiles, disabled = false }: UploadZoneProps): Reac
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={cn(
-        'relative flex min-h-[140px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-8 text-center transition-all',
+        'relative flex min-h-[160px] w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-6 py-10 text-center',
+        'transition-all duration-300',
         isDragOver
-          ? 'border-blue-500 bg-blue-500/10 scale-[1.01]'
-          : 'border-zinc-700 bg-zinc-900/50 hover:border-zinc-500 hover:bg-zinc-900',
-        disabled && 'pointer-events-none opacity-50'
+          ? 'border-emerald-500/60 bg-emerald-950/20 scale-[1.01]'
+          : 'border-zinc-700/50 bg-zinc-900/40 hover:border-emerald-700/40 hover:bg-zinc-900/60',
+        disabled && 'pointer-events-none opacity-40'
       )}
     >
       {/* Upload icon */}
       <div
         className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-full transition-colors',
-          isDragOver ? 'bg-blue-500/20' : 'bg-zinc-800'
+          'flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300',
+          isDragOver
+            ? 'bg-emerald-500/20 scale-110'
+            : 'bg-zinc-800/80'
         )}
       >
         <svg
@@ -112,7 +114,7 @@ export function UploadZone({ onFiles, disabled = false }: UploadZoneProps): Reac
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className={cn('h-6 w-6 transition-colors', isDragOver ? 'text-blue-400' : 'text-zinc-400')}
+          className={cn('h-7 w-7 transition-colors duration-300', isDragOver ? 'text-emerald-400' : 'text-zinc-400')}
           aria-hidden="true"
         >
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -122,19 +124,22 @@ export function UploadZone({ onFiles, disabled = false }: UploadZoneProps): Reac
       </div>
 
       {isDragOver ? (
-        <p className="text-sm font-medium text-blue-400">Drop files here</p>
+        <div>
+          <p className="text-base font-semibold text-emerald-400">Drop files here</p>
+          <p className="mt-1 text-sm text-emerald-500/70">Release to upload</p>
+        </div>
       ) : (
-        <>
-          <div>
-            <p className="text-sm font-medium text-zinc-200">
-              Drag &amp; drop files here, or{' '}
-              <span className="text-blue-400 underline underline-offset-2">browse</span>
-            </p>
-            <p className="mt-1 text-xs text-zinc-500">
-              Max {MAX_UPLOAD_SIZE_MB} MB per file — images, videos, audio, documents, archives
-            </p>
-          </div>
-        </>
+        <div>
+          <p className="text-sm font-medium text-zinc-200">
+            Drag &amp; drop files here, or{' '}
+            <span className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300">
+              browse
+            </span>
+          </p>
+          <p className="mt-1.5 text-xs text-zinc-500">
+            Max {MAX_UPLOAD_SIZE_MB} MB per file · Images, videos, audio, documents, archives
+          </p>
+        </div>
       )}
 
       {/* Hidden file input */}

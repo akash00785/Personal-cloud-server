@@ -16,8 +16,9 @@
 
 ---
 
-## 🟡 Agent-08+: Additional Features
+## 🟡 Agent-09+: Additional Features
 
+- [ ] Update Dashboard stat cards with real data from `/api/files` (total files, storage used, last activity)
 - [ ] Connect Google Drive integration
 - [ ] Implement remote downloader (URL → cloud)
 - [ ] Implement media streaming (audio/video)
@@ -27,9 +28,10 @@
 - [ ] Add testing setup (Jest / Vitest + Testing Library)
 - [ ] Add rate limiting on upload and auth routes
 - [ ] Add image thumbnails in grid view (inline preview without opening dialog)
-- [ ] Update Dashboard stats (total files, storage used, last activity) using `/api/files`
 - [ ] Add file move between folders (drag & drop or context menu)
 - [ ] Add folder move / nested folder drag & drop
+- [ ] Polish auth pages (login, signup) with emerald design system
+- [ ] Polish public share page (`/share/[token]`) with emerald design system
 
 ---
 
@@ -85,10 +87,23 @@
 - [x] **File Preview System — Download Button** in preview dialog
 - [x] **File Preview System — Responsive** (mobile bottom sheet, tablet/desktop modal)
 - [x] **Secure File Sharing — Share Button** (FileCard, FileRow, PreviewDialog)
-- [x] **Secure File Sharing — Generate Link** (`POST /api/files/:id/share`, UUID token, `services/share.service.ts`)
+- [x] **Secure File Sharing — Generate Link** (`POST /api/files/:id/share`, UUID token)
 - [x] **Secure File Sharing — Expiry Support** (1 Hour / 24 Hours / 7 Days / Never)
-- [x] **Secure File Sharing — Copy Link Button** (`ShareDialog`, clipboard API with fallback)
-- [x] **Secure File Sharing — Revoke Link** (`DELETE /api/files/:id/share/:shareId`, revoked_at timestamp)
-- [x] **Secure File Sharing — Status Badges** (Active / Expired / Revoked in `ShareDialog`)
-- [x] **Secure File Sharing — Public Share Page** (`/share/[token]`, no login, download only, error states)
-- [x] **Secure File Sharing — SQL Migration** (`docs/share-setup.md`, `file_shares` table + RLS)
+- [x] **Secure File Sharing — Copy Link Button** (clipboard API with fallback)
+- [x] **Secure File Sharing — Revoke Link** (`DELETE /api/files/:id/share/:shareId`)
+- [x] **Secure File Sharing — Status Badges** (Active / Expired / Revoked)
+- [x] **Secure File Sharing — Public Share Page** (`/share/[token]`, no login, download only)
+- [x] **Secure File Sharing — SQL Migration** (`docs/share-setup.md`)
+- [x] **UI/UX Polish — CSS Design Token System** (`app/globals.css` — glass, emerald+blue accent, animations)
+- [x] **UI/UX Polish — Button** (emerald variant, outline variant, xs size, smooth transitions)
+- [x] **UI/UX Polish — Card** (glass variant, elevated variant, rounded-2xl)
+- [x] **UI/UX Polish — Input** (emerald focus ring, hint prop, inline error icon)
+- [x] **UI/UX Polish — Badge** (emerald variant, dot prop)
+- [x] **UI/UX Polish — Spinner** (xs size, color prop, default emerald)
+- [x] **UI/UX Polish — Header** (gradient logo, avatar initial, emerald CTA, accent line)
+- [x] **UI/UX Polish — Sidebar** (SVG icons, emerald active dot, aria-current)
+- [x] **UI/UX Polish — FileCard / FileRow / FileToolbar** (rounded-2xl, hover translates, emerald hovers)
+- [x] **UI/UX Polish — All Dialogs** (animate-scale-in, backdrop blur, icon boxes with borders, inline error)
+- [x] **UI/UX Polish — UploadZone / UploadQueue** (emerald drag state, gradient progress, pulse-dot)
+- [x] **UI/UX Polish — Dashboard** (welcome hero, stat cards, quick action cards)
+- [x] **UI/UX Polish — Files Page** (rounded-2xl list view, tighter table header)

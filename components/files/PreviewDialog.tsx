@@ -48,26 +48,13 @@ export function isPreviewable(mimeType: string): boolean {
 
 // ─── Preview content renderers ────────────────────────────────────────────────
 
-function ImagePreview({
-  src,
-  alt,
-}: {
-  src: string;
-  alt: string;
-}): React.JSX.Element {
+function ImagePreview({ src, alt }: { src: string; alt: string }): React.JSX.Element {
   const [imgError, setImgError] = useState<boolean>(false);
 
   if (imgError) {
     return (
       <div className="flex h-full min-h-[200px] flex-col items-center justify-center gap-3 text-zinc-500">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          className="h-10 w-10"
-          aria-hidden="true"
-        >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-10 w-10" aria-hidden="true">
           <rect x="3" y="3" width="18" height="18" rx="2" />
           <circle cx="8.5" cy="8.5" r="1.5" />
           <path d="m21 15-5-5L5 21" />
@@ -83,7 +70,7 @@ function ImagePreview({
       src={src}
       alt={alt}
       onError={() => setImgError(true)}
-      className="max-h-full max-w-full rounded-lg object-contain"
+      className="max-h-full max-w-full rounded-xl object-contain"
       draggable={false}
     />
   );
@@ -94,7 +81,7 @@ function PdfPreview({ src }: { src: string }): React.JSX.Element {
     <iframe
       src={src}
       title="PDF Preview"
-      className="h-full w-full rounded-lg border-0"
+      className="h-full w-full rounded-xl border-0"
       aria-label="PDF document preview"
     />
   );
@@ -106,7 +93,7 @@ function VideoPreview({ src, mimeType }: { src: string; mimeType: string }): Rea
       src={src}
       controls
       preload="metadata"
-      className="max-h-full max-w-full rounded-lg"
+      className="max-h-full max-w-full rounded-xl"
       aria-label="Video preview"
     >
       <source src={src} type={mimeType} />
@@ -118,16 +105,8 @@ function VideoPreview({ src, mimeType }: { src: string; mimeType: string }): Rea
 function AudioPreview({ src, mimeType, fileName }: { src: string; mimeType: string; fileName: string }): React.JSX.Element {
   return (
     <div className="flex w-full flex-col items-center justify-center gap-6 py-8">
-      {/* Waveform icon decoration */}
-      <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-pink-900/30">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          className="h-10 w-10 text-pink-400"
-          aria-hidden="true"
-        >
+      <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-emerald-900/30 bg-emerald-950/40">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-10 w-10 text-emerald-400" aria-hidden="true">
           <path d="M9 18V5l12-2v13" />
           <circle cx="6" cy="18" r="3" />
           <circle cx="18" cy="16" r="3" />
@@ -176,16 +155,13 @@ function InfoPanel({ file }: { file: FileListItem }): React.JSX.Element {
   ];
 
   return (
-    <div className="flex flex-col gap-0 divide-y divide-zinc-800">
+    <div className="flex flex-col divide-y divide-zinc-800/60">
       {rows.map(({ label, value }) => (
         <div key={label} className="flex flex-col gap-0.5 px-5 py-3">
-          <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+          <dt className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
             {label}
           </dt>
-          <dd
-            className="break-all text-sm text-zinc-200"
-            title={value}
-          >
+          <dd className="break-all text-sm text-zinc-200" title={value}>
             {value}
           </dd>
         </div>
@@ -215,21 +191,18 @@ export function PreviewDialog({
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
-  // Fetch signed URL only while the dialog is open and we have a file.
   const { signedUrl, isLoading, error } = useFilePreview(
     isOpen && file ? file.id : null
   );
 
   const kind = file ? getPreviewKind(file.mimeType) : 'none';
 
-  // Focus close button when dialog opens.
   useEffect(() => {
     if (isOpen) {
       requestAnimationFrame(() => closeRef.current?.focus());
     }
   }, [isOpen]);
 
-  // Escape key closes the dialog.
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent): void => {
@@ -239,9 +212,6 @@ export function PreviewDialog({
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  // Reset download error when file changes.
-  // Wrapped in Promise.resolve so setState is never synchronous in the effect body
-  // (satisfies react-hooks/set-state-in-effect).
   useEffect(() => {
     Promise.resolve().then(() => {
       setDownloadError(null);
@@ -267,7 +237,8 @@ export function PreviewDialog({
   return (
     /* Backdrop */
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="preview-dialog-title"
@@ -278,14 +249,18 @@ export function PreviewDialog({
       {/* Panel */}
       <div
         className={cn(
-          'flex w-full flex-col rounded-t-2xl border border-zinc-800 bg-zinc-900 shadow-2xl',
+          'flex w-full flex-col',
+          'rounded-t-2xl border border-zinc-800/60 bg-zinc-900',
           'sm:max-w-3xl sm:rounded-2xl lg:max-w-5xl',
           'max-h-[95dvh] sm:max-h-[88vh]',
-          'overflow-hidden'
+          'shadow-2xl shadow-black/60',
+          'ring-1 ring-inset ring-white/[0.04]',
+          'overflow-hidden',
+          'animate-scale-in'
         )}
       >
         {/* ── Header ────────────────────────────────────────────────────── */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-zinc-800 px-5 py-4">
+        <div className="flex shrink-0 items-center gap-3 border-b border-zinc-800/60 bg-zinc-900/80 px-5 py-3.5">
           <FileIcon mimeType={file.mimeType} size="sm" className="shrink-0" />
           <div className="min-w-0 flex-1">
             <h2
@@ -295,28 +270,23 @@ export function PreviewDialog({
             >
               {file.fileName}
             </h2>
-            <p className="text-xs text-zinc-500">{getMimeLabel(file.mimeType)} · {formatBytes(file.fileSize)}</p>
+            <p className="text-xs text-zinc-500">
+              {getMimeLabel(file.mimeType)} · {formatBytes(file.fileSize)}
+            </p>
           </div>
           {/* Close */}
           <button
             ref={closeRef}
             onClick={onClose}
             className={cn(
-              'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
-              'border border-zinc-700 bg-zinc-800 text-zinc-400',
-              'transition-colors hover:border-zinc-600 hover:text-white',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+              'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl',
+              'border border-zinc-700/60 bg-zinc-800/80 text-zinc-400',
+              'transition-all duration-200 hover:border-zinc-600/80 hover:bg-zinc-700/80 hover:text-white',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50'
             )}
             aria-label="Close preview"
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="h-4 w-4"
-              aria-hidden="true"
-            >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -334,52 +304,35 @@ export function PreviewDialog({
                 : kind === 'audio'
                   ? 'py-4'
                   : 'p-4 sm:p-6',
-              'bg-zinc-950'
+              'bg-zinc-950/80'
             )}
           >
             {isLoading && (
-              <div className="flex flex-col items-center gap-3 text-zinc-500">
-                <Spinner size="lg" className="text-zinc-400" />
-                <p className="text-sm">Loading preview…</p>
+              <div className="flex flex-col items-center gap-3">
+                <Spinner size="lg" color="emerald" />
+                <p className="text-sm text-zinc-500">Loading preview…</p>
               </div>
             )}
 
             {!isLoading && error && (
-              <div className="flex flex-col items-center gap-3 text-zinc-500">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="h-10 w-10 text-red-400"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+              <div className="flex flex-col items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-red-900/30 bg-red-950/40">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-7 w-7 text-red-400" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
             {!isLoading && !error && signedUrl && (
               <>
-                {kind === 'image' && (
-                  <ImagePreview src={signedUrl} alt={file.fileName} />
-                )}
-                {kind === 'pdf' && (
-                  <PdfPreview src={signedUrl} />
-                )}
-                {kind === 'video' && (
-                  <VideoPreview src={signedUrl} mimeType={file.mimeType} />
-                )}
-                {kind === 'audio' && (
-                  <AudioPreview
-                    src={signedUrl}
-                    mimeType={file.mimeType}
-                    fileName={file.fileName}
-                  />
-                )}
+                {kind === 'image' && <ImagePreview src={signedUrl} alt={file.fileName} />}
+                {kind === 'pdf' && <PdfPreview src={signedUrl} />}
+                {kind === 'video' && <VideoPreview src={signedUrl} mimeType={file.mimeType} />}
+                {kind === 'audio' && <AudioPreview src={signedUrl} mimeType={file.mimeType} fileName={file.fileName} />}
                 {kind === 'none' && <NoPreview mimeType={file.mimeType} />}
               </>
             )}
@@ -391,14 +344,11 @@ export function PreviewDialog({
 
           {/* Info sidebar */}
           <aside
-            className={cn(
-              'shrink-0 overflow-y-auto border-t border-zinc-800 md:w-64 md:border-l md:border-t-0'
-            )}
+            className="shrink-0 overflow-y-auto border-t border-zinc-800/60 md:w-60 md:border-l md:border-t-0"
             aria-label="File information"
           >
-            {/* Section heading */}
-            <div className="border-b border-zinc-800 px-5 py-3">
-              <h3 className="text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+            <div className="border-b border-zinc-800/60 bg-zinc-900/60 px-5 py-3">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
                 File Information
               </h3>
             </div>
@@ -409,22 +359,22 @@ export function PreviewDialog({
         </div>
 
         {/* ── Footer ────────────────────────────────────────────────────── */}
-        <div className="shrink-0 border-t border-zinc-800 px-5 py-4">
+        <div className="shrink-0 border-t border-zinc-800/60 bg-zinc-900/60 px-5 py-3.5">
           {downloadError && (
-            <p
+            <div
               role="alert"
-              className="mb-3 rounded-lg bg-red-900/20 px-3 py-2 text-center text-sm text-red-400"
+              className="mb-3 flex items-center gap-2 rounded-xl border border-red-900/40 bg-red-950/40 px-3 py-2 text-sm text-red-400"
             >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               {downloadError}
-            </p>
+            </div>
           )}
           <div className="flex items-center justify-between gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="text-zinc-400"
-            >
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-zinc-400 hover:text-zinc-200">
               Close
             </Button>
 
@@ -434,16 +384,8 @@ export function PreviewDialog({
                 variant="secondary"
                 size="sm"
                 onClick={() => onShare(file)}
-                className="gap-1.5"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="h-3.5 w-3.5"
-                  aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
                   <circle cx="18" cy="5" r="3" />
                   <circle cx="6" cy="12" r="3" />
                   <circle cx="18" cy="19" r="3" />
@@ -455,22 +397,14 @@ export function PreviewDialog({
 
               {/* Download button */}
               <Button
-                variant="primary"
+                variant="emerald"
                 size="sm"
                 onClick={() => void handleDownload()}
                 disabled={isDownloading}
                 isLoading={isDownloading}
-                className="gap-1.5"
               >
                 {!isDownloading && (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-3.5 w-3.5"
-                    aria-hidden="true"
-                  >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                     <polyline points="7 10 12 15 17 10" />
                     <line x1="12" y1="15" x2="12" y2="3" />

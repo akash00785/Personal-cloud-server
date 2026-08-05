@@ -22,16 +22,12 @@ export function DeleteFolderDialog({
   const [error, setError] = useState<string | null>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
 
-  // Focus the cancel button when the dialog opens.
-  // Only a DOM side-effect (focus) — no setState — which is exactly what
-  // effects are intended for.
   useEffect(() => {
     if (isOpen) {
       requestAnimationFrame(() => cancelRef.current?.focus());
     }
   }, [isOpen]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent): void => {
@@ -56,7 +52,8 @@ export function DeleteFolderDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       role="dialog"
       aria-modal="true"
       aria-labelledby="delete-folder-title"
@@ -67,18 +64,21 @@ export function DeleteFolderDialog({
     >
       <div
         className={cn(
-          'w-full max-w-sm rounded-2xl border border-zinc-800 bg-zinc-900 p-6 shadow-2xl',
-          'animate-in fade-in zoom-in-95 duration-150'
+          'w-full max-w-sm animate-scale-in',
+          'rounded-2xl border border-zinc-800/60 bg-zinc-900',
+          'shadow-2xl shadow-black/50',
+          'ring-1 ring-inset ring-white/[0.04]',
+          'p-6'
         )}
       >
         {/* Icon */}
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-900/30">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-900/30 bg-red-950/40">
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.5"
-            className="h-6 w-6 text-red-400"
+            className="h-7 w-7 text-red-400"
             aria-hidden="true"
           >
             <polyline points="3 6 5 6 21 6" />
@@ -97,7 +97,7 @@ export function DeleteFolderDialog({
         </h2>
 
         {/* Description */}
-        <p id="delete-folder-desc" className="mt-2 text-center text-sm text-zinc-400">
+        <p id="delete-folder-desc" className="mt-2 text-center text-sm text-zinc-400 leading-relaxed">
           <span className="font-medium text-zinc-200">&ldquo;{folder.name}&rdquo;</span> and all
           its sub-folders will be permanently deleted. Files inside will be moved to the root
           level. This action cannot be undone.
@@ -105,16 +105,21 @@ export function DeleteFolderDialog({
 
         {/* Error */}
         {error && (
-          <p
+          <div
             role="alert"
-            className="mt-3 rounded-lg bg-red-900/20 px-3 py-2 text-center text-sm text-red-400"
+            className="mt-4 flex items-center gap-2 rounded-xl border border-red-900/40 bg-red-950/40 px-3 py-2.5 text-sm text-red-400"
           >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 shrink-0" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
             {error}
-          </p>
+          </div>
         )}
 
         {/* Actions */}
-        <div className="mt-6 flex gap-3">
+        <div className="mt-6 flex gap-2.5">
           <Button
             ref={cancelRef}
             variant="secondary"

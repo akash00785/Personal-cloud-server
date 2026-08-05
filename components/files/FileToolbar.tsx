@@ -37,8 +37,8 @@ export function FileToolbar({
       {/* Left: search + count */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {/* Search */}
-        <div className="relative min-w-0 flex-1 sm:max-w-xs">
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center" aria-hidden="true">
+        <div className="relative min-w-0 flex-1 sm:max-w-sm">
+          <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -54,19 +54,25 @@ export function FileToolbar({
             type="search"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search files…"
+            placeholder="Search files and folders…"
             aria-label="Search files by name"
             className={cn(
-              'w-full rounded-lg border border-zinc-700 bg-zinc-900 py-2 pl-9 pr-3',
+              'w-full rounded-xl border border-zinc-700/60 bg-zinc-900/80 py-2 pl-10 pr-9',
               'text-sm text-zinc-100 placeholder:text-zinc-500',
-              'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500'
+              'transition-all duration-200',
+              'focus:border-emerald-600/60 focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
+              'hover:border-zinc-600/80'
             )}
           />
           {search && (
             <button
               onClick={() => onSearchChange('')}
               aria-label="Clear search"
-              className="absolute inset-y-0 right-2 flex items-center px-1 text-zinc-500 hover:text-zinc-300"
+              className={cn(
+                'absolute inset-y-0 right-2.5 flex items-center px-1',
+                'text-zinc-500 hover:text-zinc-300 transition-colors duration-150',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded'
+              )}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -77,25 +83,25 @@ export function FileToolbar({
         </div>
 
         {/* Count */}
-        <span className="shrink-0 text-xs text-zinc-500" aria-live="polite" aria-atomic="true">
-          {fileCount} {fileCount === 1 ? 'file' : 'files'}
+        <span className="shrink-0 text-xs text-zinc-600" aria-live="polite" aria-atomic="true">
+          {fileCount} {fileCount === 1 ? 'item' : 'items'}
         </span>
       </div>
 
       {/* Right: sort + view toggle */}
       <div className="flex shrink-0 items-center gap-2">
         {/* Sort field */}
-        <div className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 p-1">
+        <div className="flex items-center gap-0.5 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-1">
           {SORT_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
               onClick={() => onSortFieldChange(value)}
               aria-pressed={sortField === value}
               className={cn(
-                'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+                'rounded-lg px-2.5 py-1 text-xs font-medium transition-all duration-200',
                 sortField === value
-                  ? 'bg-zinc-700 text-white'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-700/90 text-white shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-300'
               )}
             >
               {label}
@@ -106,20 +112,26 @@ export function FileToolbar({
         {/* Sort direction */}
         <button
           onClick={onSortOrderToggle}
-          aria-label={sortOrder === 'asc' ? 'Sort ascending — click to sort descending' : 'Sort descending — click to sort ascending'}
+          aria-label={
+            sortOrder === 'asc'
+              ? 'Sort ascending — click to sort descending'
+              : 'Sort descending — click to sort ascending'
+          }
           title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-700 bg-zinc-900',
-            'text-zinc-400 transition-colors hover:border-zinc-600 hover:text-white'
+            'flex h-8 w-8 items-center justify-center rounded-xl border',
+            'border-zinc-700/50 bg-zinc-900/80 text-zinc-500',
+            'transition-all duration-200 hover:border-zinc-600/80 hover:text-zinc-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50'
           )}
         >
           {sortOrder === 'asc' ? (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
               <path d="M3 9l4-4 4 4M7 5v14" />
               <path d="M13 15l4 4 4-4M17 19V5" />
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
               <path d="M3 15l4 4 4-4M7 19V5" />
               <path d="M13 9l4-4 4 4M17 5v14" />
             </svg>
@@ -127,20 +139,20 @@ export function FileToolbar({
         </button>
 
         {/* Divider */}
-        <div className="h-5 w-px bg-zinc-700" aria-hidden="true" />
+        <div className="h-5 w-px bg-zinc-800" aria-hidden="true" />
 
         {/* View mode toggle */}
-        <div className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 p-1">
+        <div className="flex items-center gap-0.5 rounded-xl border border-zinc-700/50 bg-zinc-900/80 p-1">
           <button
             onClick={() => onViewModeChange('grid')}
             aria-pressed={viewMode === 'grid'}
             aria-label="Grid view"
             title="Grid view"
             className={cn(
-              'flex h-6 w-7 items-center justify-center rounded-md transition-colors',
+              'flex h-6 w-7 items-center justify-center rounded-lg transition-all duration-200',
               viewMode === 'grid'
-                ? 'bg-zinc-700 text-white'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-zinc-700/90 text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-300'
             )}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
@@ -157,10 +169,10 @@ export function FileToolbar({
             aria-label="List view"
             title="List view"
             className={cn(
-              'flex h-6 w-7 items-center justify-center rounded-md transition-colors',
+              'flex h-6 w-7 items-center justify-center rounded-lg transition-all duration-200',
               viewMode === 'list'
-                ? 'bg-zinc-700 text-white'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-zinc-700/90 text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-300'
             )}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">

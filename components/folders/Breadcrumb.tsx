@@ -23,7 +23,7 @@ export function Breadcrumb({ crumbs, onNavigate }: BreadcrumbProps): React.JSX.E
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                className="h-3.5 w-3.5 shrink-0 text-zinc-600"
+                className="h-3 w-3 shrink-0 text-zinc-700"
                 aria-hidden="true"
               >
                 <polyline points="9 18 15 12 9 6" />
@@ -43,9 +43,9 @@ export function Breadcrumb({ crumbs, onNavigate }: BreadcrumbProps): React.JSX.E
                 type="button"
                 onClick={() => onNavigate(crumb.id)}
                 className={cn(
-                  'rounded px-1 py-0.5 text-sm font-medium text-zinc-400 transition-colors',
-                  'hover:bg-zinc-800 hover:text-zinc-100',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+                  'rounded-lg px-1.5 py-0.5 text-sm font-medium text-zinc-500',
+                  'transition-all duration-200 hover:bg-zinc-800/70 hover:text-zinc-200',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50'
                 )}
               >
                 {crumb.name}

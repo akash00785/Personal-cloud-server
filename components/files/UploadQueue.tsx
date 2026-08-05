@@ -26,15 +26,15 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
   ).length;
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+    <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/80 p-4 shadow-sm shadow-black/20">
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {activeCount > 0 ? (
             <span
               role="status"
               aria-label="Uploading"
-              className="h-2 w-2 animate-pulse rounded-full bg-blue-400"
+              className="h-2 w-2 rounded-full bg-emerald-400 pulse-dot"
             />
           ) : errorCount > 0 ? (
             <span className="h-2 w-2 rounded-full bg-red-400" />
@@ -53,7 +53,10 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
         {activeCount === 0 && (
           <button
             onClick={onClear}
-            className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className={cn(
+              'text-xs text-zinc-500 hover:text-zinc-300 transition-colors duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50 rounded px-1'
+            )}
             aria-label="Clear upload queue"
           >
             Clear
@@ -62,36 +65,31 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
       </div>
 
       {/* Items */}
-      <ul className="space-y-2" aria-label="Upload queue">
+      <ul className="space-y-2.5" aria-label="Upload queue">
         {queue.map((item) => (
           <li key={item.id} className="flex items-center gap-3">
             {/* Status icon */}
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-800">
+            <div
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border',
+                item.status === 'done'
+                  ? 'border-emerald-800/40 bg-emerald-950/40'
+                  : item.status === 'error'
+                    ? 'border-red-900/40 bg-red-950/40'
+                    : 'border-zinc-700/50 bg-zinc-800/80'
+              )}
+            >
               {item.status === 'uploading' || item.status === 'pending' ? (
                 <span
-                  className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-600 border-t-blue-400"
+                  className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-600/60 border-t-emerald-400"
                   aria-hidden="true"
                 />
               ) : item.status === 'done' ? (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="h-4 w-4 text-emerald-400"
-                  aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 text-emerald-400" aria-hidden="true">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="h-4 w-4 text-red-400"
-                  aria-hidden="true"
-                >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-4 w-4 text-red-400" aria-hidden="true">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
@@ -101,15 +99,12 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
             {/* File info + progress */}
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
-                <span
-                  className="truncate text-sm text-zinc-200"
-                  title={item.name}
-                >
+                <span className="truncate text-sm text-zinc-200" title={item.name}>
                   {item.name}
                 </span>
                 <span
                   className={cn(
-                    'shrink-0 text-xs',
+                    'shrink-0 text-xs font-medium',
                     item.status === 'done'
                       ? 'text-emerald-400'
                       : item.status === 'error'
@@ -130,7 +125,7 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
               {/* Progress bar */}
               {(item.status === 'uploading' || item.status === 'pending') && (
                 <div
-                  className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-zinc-700"
+                  className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-zinc-800"
                   role="progressbar"
                   aria-valuenow={item.progress}
                   aria-valuemin={0}
@@ -138,7 +133,7 @@ export function UploadQueue({ queue, onClear }: UploadQueueProps): React.JSX.Ele
                   aria-label={`Upload progress for ${item.name}`}
                 >
                   <div
-                    className="h-full rounded-full bg-blue-500 transition-all duration-200"
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-300 ease-out"
                     style={{ width: `${item.progress}%` }}
                   />
                 </div>

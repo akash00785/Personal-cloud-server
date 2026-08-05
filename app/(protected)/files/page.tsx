@@ -405,10 +405,10 @@ function FilesPageContent(): React.JSX.Element {
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-zinc-800 bg-zinc-950">
+          <div className="rounded-2xl border border-zinc-800/60 bg-zinc-950/60 overflow-hidden">
             {/* Table header */}
             <div
-              className="hidden grid-cols-[1fr_80px_80px_112px_72px] items-center gap-3 border-b border-zinc-800 px-4 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500 sm:grid"
+              className="hidden grid-cols-[1fr_80px_80px_112px_72px] items-center gap-3 border-b border-zinc-800/60 bg-zinc-900/40 px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-500 sm:grid"
               aria-hidden="true"
             >
               <span>Name</span>

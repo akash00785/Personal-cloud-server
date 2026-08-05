@@ -1,8 +1,8 @@
 # Project Status
 
-**Last Updated:** 2026-08-04
-**Agent:** Agent-06 (File Preview System)
-**Phase:** File Preview System — Image, PDF, Video, Audio, Responsive Dialog, File Info Panel
+**Last Updated:** 2026-08-05
+**Agent:** Agent-08 (UI/UX Polish — Unified Design System)
+**Phase:** Production-ready — UI/UX Polish Complete
 
 ---
 
@@ -108,52 +108,7 @@
 - [x] **Created `components/folders/DeleteFolderDialog.tsx`** — accessible delete dialog with cascade warning
 - [x] **Updated `app/(protected)/files/page.tsx`** — integrated folder navigation, breadcrumb, folder CRUD
 - [x] **Created `docs/folder-setup.md`** — idempotent SQL migration guide
-- [x] **Build** — zero TypeScript errors, zero errors
-- [x] **ESLint** — zero errors, zero warnings
-- [x] **npm audit** — 0 known vulnerabilities
-
----
-
-## Current File Structure
-
-```
-app/
-├── api/
-│   ├── files/
-│   │   ├── route.ts              # GET list (supports ?folderId=)
-│   │   ├── upload/route.ts       # POST upload (supports folderId field)
-│   │   └── [id]/route.ts         # GET signed URL / DELETE
-│   └── folders/                  # ← NEW
-│       ├── route.ts              # GET list / POST create
-│       └── [id]/
-│           ├── route.ts          # PATCH rename / DELETE delete
-│           └── path/route.ts     # GET breadcrumb trail
-├── (protected)/
-│   ├── layout.tsx
-│   ├── dashboard/page.tsx
-│   ├── files/page.tsx            # ← UPDATED: folder-aware
-│   └── profile/page.tsx
-components/
-├── files/ (FileIcon, UploadZone, UploadQueue, FileCard, FileRow, FileToolbar, DeleteDialog)
-├── folders/                      # ← NEW
-│   ├── Breadcrumb.tsx
-│   ├── FolderCard.tsx
-│   ├── FolderRow.tsx
-│   ├── CreateFolderDialog.tsx
-│   ├── RenameFolderDialog.tsx
-│   └── DeleteFolderDialog.tsx
-hooks/
-├── useFiles.ts                   # ← UPDATED: optional folderId param
-├── useFolders.ts                 # ← NEW
-├── useFileUpload.ts
-services/
-├── folder.service.ts             # ← NEW
-├── storage.service.ts            # ← UPDATED: folderId support
-docs/
-├── supabase-setup.md
-├── storage-setup.md
-└── folder-setup.md               # ← NEW: SQL migration for folders
-```
+- [x] **Build** — zero TypeScript errors | **ESLint** — zero errors | **npm audit** — 0 vulnerabilities
 
 ---
 
@@ -178,29 +133,64 @@ docs/
 - [x] **`app/api/files/[id]/share/[shareId]/route.ts`** — `DELETE` revoke share (authenticated)
 - [x] **`app/api/share/[token]/route.ts`** — `GET` public resolve (no auth required)
 - [x] **`hooks/useFileSharing.ts`** — Client hook for share CRUD
-- [x] **`components/files/ShareDialog.tsx`** — Full share management dialog (generate, copy, revoke, status badges)
+- [x] **`components/files/ShareDialog.tsx`** — Full share management dialog
 - [x] **`app/share/[token]/page.tsx`** — Public share page (no login, download only, error states)
-- [x] **`components/files/FileCard.tsx`** — Added `onShare` prop + Share button
-- [x] **`components/files/FileRow.tsx`** — Added `onShare` prop + Share button
-- [x] **`components/files/PreviewDialog.tsx`** — Added `onShare` prop + Share button in footer
-- [x] **`app/(protected)/files/page.tsx`** — ShareDialog integrated, handleShareOpen/Close wired
-- [x] **`docs/share-setup.md`** — SQL migration guide for `file_shares` table + RLS + API reference
 - [x] **Build** — zero errors | **ESLint** — zero errors | **TypeScript** — zero errors | **npm audit** — 0 vulnerabilities
 
 ---
 
-## 📝 Notes for Agent-08
+## ✅ Completed Tasks (Agent-08 — UI/UX Polish — Unified Design System)
 
-1. **Run SQL migration** — `docs/share-setup.md` must be executed in Supabase Dashboard before the sharing feature works
-2. **Add `SUPABASE_SERVICE_ROLE_KEY`** to `.env.local` — required for the public share endpoint (`GET /api/share/[token]`)
-3. **Share token** is a random UUID in the URL: `/share/<uuid>` — the token is the only credential for public access
-4. **Public share page** is at `/share/[token]` — no auth required, intentionally read-only (view + download only)
-5. **Share status** is computed from `expires_at` and `revoked_at` — check `services/share.service.ts` for logic
-6. **All existing systems unchanged** — Folder, Auth, Upload, Preview, existing APIs are untouched
+### Design System Foundation
+- [x] **`app/globals.css`** — Full CSS design token system: glass variables, emerald+blue accent palette, custom radius, scrollbar, `@keyframes` (shimmer, fadeInUp, scaleIn, slideUp, pulseDot), utility classes (`.glass`, `.glass-card`, `.skeleton`, `.animate-scale-in`, `.animate-fade-in-up`, `.animate-slide-up`, `.toast-*`), emerald `::selection`
 
-1. **Run SQL migration** — `docs/folder-setup.md` must be executed in Supabase Dashboard before folders work
-2. **Folder API is complete** — `/api/folders` (list/create), `/api/folders/:id` (rename/delete), `/api/folders/:id/path` (breadcrumb)
-3. **File upload supports folderId** — pass `folderId` as a form field to `POST /api/files/upload`
-4. **All protected pages** go inside `app/(protected)/` — layout handles auth automatically
-5. **Dark theme, `cn()`, `@/` alias** — always follow PROJECT_RULES.md
-6. **Hook pattern** — all setState calls inside `.then()/.catch()` callbacks; never synchronous inside useEffect bodies
+### UI Components Polished
+- [x] **`components/ui/Button.tsx`** — `emerald` + `outline` variants; `xs` size; rounded-xl; duration-200 transitions; ring-offset-zinc-950 focus; shadow on primary/emerald/destructive
+- [x] **`components/ui/Card.tsx`** — `glass` + `elevated` variants; rounded-2xl; soft shadow; inset ring on glass
+- [x] **`components/ui/Input.tsx`** — rounded-xl; emerald focus ring; hover border; `hint` prop; error state with inline icon and `role="alert"`
+- [x] **`components/ui/Badge.tsx`** — `emerald` variant; optional `dot` prop with matching per-variant color
+- [x] **`components/ui/Spinner.tsx`** — `xs` size; `color` prop (default|emerald|blue|white); defaults to `emerald`
+
+### Layout Components Polished
+- [x] **`components/layout/Header.tsx`** — Emerald-gradient logo icon; avatar initial; "Get started" CTA emerald; backdrop-blur-xl; top accent gradient line
+- [x] **`components/layout/Sidebar.tsx`** — SVG icons replacing emoji; emerald active indicator dot; `aria-current`; rounded-xl links
+- [x] **`components/layout/Footer.tsx`** — Cleaned up; emoji removed
+- [x] **`components/layout/PageWrapper.tsx`** — Reformatted
+
+### File Components Polished
+- [x] **`components/files/FileCard.tsx`** — rounded-2xl; hover translate; emerald filename hover; action hovers; emerald download spinner; action reveal
+- [x] **`components/files/FileRow.tsx`** — Same polish; h-7 action buttons; hover translate on icon
+- [x] **`components/files/FileToolbar.tsx`** — rounded-xl search with emerald focus ring; bg opacity toggle groups
+- [x] **`components/files/DeleteDialog.tsx`** — animate-scale-in; rounded-2xl icon box; inline error with icon; backdrop via style prop
+- [x] **`components/files/UploadZone.tsx`** — min-h-[160px]; emerald drag-over state; scale-110 icon on drag
+- [x] **`components/files/UploadQueue.tsx`** — pulse-dot active indicator; emerald gradient progress bar; rounded-xl icon boxes
+- [x] **`components/files/PreviewDialog.tsx`** — animate-scale-in; ring-1 ring-inset; emerald Spinner; `Button variant="emerald"` download
+- [x] **`components/files/ShareDialog.tsx`** — animate-scale-in; emerald icon header; emerald expiry pill; emerald Generate button; StatusBadge with dot; empty state; CopyButton emerald
+
+### Folder Components Polished
+- [x] **`components/folders/FolderCard.tsx`** — rounded-2xl card; amber icon box with border; hover:scale-105 on icon
+- [x] **`components/folders/FolderRow.tsx`** — Amber icon with border; h-7 action buttons; hover patterns
+- [x] **`components/folders/Breadcrumb.tsx`** — rounded-lg crumb buttons; emerald focus ring
+- [x] **`components/folders/CreateFolderDialog.tsx`** — animate-scale-in; rounded-2xl icon box; emerald Create button; inline error with icon
+- [x] **`components/folders/RenameFolderDialog.tsx`** — animate-scale-in; rounded-2xl icon box; inline error with icon; subtitle text
+- [x] **`components/folders/DeleteFolderDialog.tsx`** — animate-scale-in; rounded-2xl icon box; inline error with icon
+
+### Pages Polished
+- [x] **`app/(protected)/dashboard/page.tsx`** — Welcome hero with avatar+gradient; stat cards with icons; quick action cards with hover arrow
+- [x] **`app/(protected)/files/page.tsx`** — List view container rounded-2xl; table header bg-zinc-900/40; tighter tracking
+
+### Quality
+- [x] **`npm run build`** — zero errors, zero warnings
+- [x] **`npm run lint`** — zero errors, zero warnings
+- [x] **`npx tsc --noEmit`** — zero TypeScript errors
+- [x] **`npm audit`** — 0 known vulnerabilities
+
+---
+
+## 📝 Notes for Next Agent
+
+1. **SQL migrations still required** — Run `docs/supabase-setup.md`, `docs/storage-setup.md`, `docs/folder-setup.md`, `docs/share-setup.md` in Supabase Dashboard before live use.
+2. **`SUPABASE_SERVICE_ROLE_KEY`** must be added to `.env.local` for the public share endpoint.
+3. **Design system** — All CSS tokens live in `app/globals.css`. Use `var(--glass-*)`, `var(--accent-*)`, etc. Do not add new colors outside this system.
+4. **Tailwind v4** — Do not use v3 plugin config syntax. All custom utilities are in `globals.css`.
+5. **Animations** — Use `.animate-scale-in`, `.animate-fade-in-up`, `.animate-slide-up` utility classes from `globals.css` for dialog/card enter animations.

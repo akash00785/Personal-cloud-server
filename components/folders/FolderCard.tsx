@@ -20,8 +20,12 @@ export function FolderCard({
   return (
     <article
       className={cn(
-        'group relative flex flex-col gap-3 rounded-xl border border-zinc-800 bg-zinc-900 p-4',
-        'transition-all duration-150 hover:border-zinc-700 hover:bg-zinc-800/60 hover:shadow-lg'
+        'group relative flex flex-col gap-3 rounded-2xl border p-4',
+        'border-zinc-800/60 bg-zinc-900/80',
+        'shadow-sm shadow-black/20',
+        'transition-all duration-200 ease-out',
+        'hover:border-amber-800/30 hover:bg-zinc-800/70 hover:shadow-md hover:shadow-black/30',
+        'hover:-translate-y-0.5'
       )}
       aria-label={`Folder: ${folder.name}`}
     >
@@ -29,11 +33,15 @@ export function FolderCard({
       <button
         type="button"
         onClick={() => onOpen(folder)}
-        className="flex items-start gap-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500 rounded-lg"
+        className={cn(
+          'flex items-start gap-3 text-left',
+          'rounded-xl transition-all duration-200',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50'
+        )}
         aria-label={`Open folder ${folder.name}`}
       >
-        {/* Folder SVG icon */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-900/30">
+        {/* Folder icon */}
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-900/30 bg-amber-950/40 transition-all duration-200 group-hover:scale-105">
           <svg
             viewBox="0 0 24 24"
             fill="currentColor"
@@ -46,20 +54,20 @@ export function FolderCard({
 
         <div className="min-w-0 flex-1">
           <p
-            className="text-sm font-medium leading-snug text-zinc-100"
+            className="text-sm font-medium leading-snug text-zinc-100 transition-colors duration-150 group-hover:text-white"
             title={folder.name}
           >
             {truncate(folder.name, 36)}
           </p>
-          <p className="mt-0.5 text-xs text-zinc-500">{formatDate(folder.createdAt)}</p>
+          <p className="mt-0.5 text-[11px] text-zinc-600">{formatDate(folder.createdAt)}</p>
         </div>
       </button>
 
       {/* Actions — appear on hover */}
       <div
         className={cn(
-          'flex gap-2 transition-opacity duration-150',
-          'opacity-100 sm:opacity-0 sm:group-hover:opacity-100'
+          'flex gap-1.5 transition-all duration-200',
+          'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:translate-y-1 sm:group-hover:translate-y-0'
         )}
       >
         {/* Rename */}
@@ -67,21 +75,14 @@ export function FolderCard({
           type="button"
           onClick={() => onRename(folder)}
           className={cn(
-            'flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-1.5',
-            'text-xs font-medium text-zinc-300 transition-colors',
-            'hover:border-zinc-600 hover:bg-zinc-700 hover:text-white',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500'
+            'flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-1.5',
+            'border-zinc-700/60 bg-zinc-800/80 text-xs font-medium text-zinc-300',
+            'transition-all duration-200 hover:border-zinc-600/80 hover:bg-zinc-700/80 hover:text-white',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/50'
           )}
           aria-label={`Rename folder ${folder.name}`}
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-3.5 w-3.5"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
             <path d="M12 20h9" />
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
           </svg>
@@ -93,21 +94,15 @@ export function FolderCard({
           type="button"
           onClick={() => onDelete(folder)}
           className={cn(
-            'flex items-center justify-center rounded-lg border border-zinc-700 bg-zinc-800 px-2.5 py-1.5',
-            'text-xs font-medium text-zinc-400 transition-colors',
-            'hover:border-red-800 hover:bg-red-900/20 hover:text-red-400',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+            'flex items-center justify-center rounded-xl border px-2.5 py-1.5',
+            'border-zinc-700/60 bg-zinc-800/80 text-xs font-medium text-zinc-400',
+            'transition-all duration-200 hover:border-red-800/60 hover:bg-red-950/40 hover:text-red-400',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50'
           )}
           aria-label={`Delete folder ${folder.name}`}
+          title="Delete"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="h-3.5 w-3.5"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5" aria-hidden="true">
             <polyline points="3 6 5 6 21 6" />
             <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
             <path d="M10 11v6M14 11v6" />
